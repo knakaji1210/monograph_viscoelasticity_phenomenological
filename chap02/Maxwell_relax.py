@@ -27,7 +27,6 @@ def reqParams():
 def timeAxis(relaxTime):
     log_relaxT = np.log10(relaxTime)
     linearTime = np.linspace(-relaxTime*0.5, relaxTime*3, 400)
-#    scaledLinearTime = [t/relaxTime for t in linearTime]
     scaledLinearTime = linearTime/relaxTime
     logTime = np.logspace(log_relaxT-1.0, log_relaxT+1.0, 400)
     scaledLogTime = np.log10(logTime/relaxTime)
