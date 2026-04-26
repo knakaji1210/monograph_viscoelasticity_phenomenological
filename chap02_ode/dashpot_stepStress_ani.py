@@ -7,13 +7,13 @@ from matplotlib import patches
 from matplotlib.animation import FuncAnimation
 
 '''
-テキストの式(1.5)をベースに組み立てる
+テキストの式(2.6)をベースに組み立てる
 '''
 
 def dashpot_stepStress(e, t, s, eta):
 # e: strain, s: stress, eta: viscosity
 # ここでは下でargsとしてs=s0を入れてステップ応力を実現
-    dedt = s/eta        # (1.5)
+    dedt = s/eta        # (2.6)
     return dedt
 
 # variables
