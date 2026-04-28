@@ -24,7 +24,7 @@ def func_Maxwell1(modulus, relaxTime):
         t1 = float(input('Enter t1 (0<=t<t1) (ms) (default = 50 ms): '))*10**(-3)
     except ValueError:
         t1 = 50*10**(-3)
-    tim = np.linspace(0, t1, int(t1*10**3 /2))
+    tim = np.linspace(0, t1, 500)
     strain = np.array([c*t for t in tim])
     stress = np.array([c*modulus*relaxTime*(1 - np.exp(-t/relaxTime)) for t in tim])
     stress = np.array(stress)
@@ -37,7 +37,7 @@ def func_Maxwell2(modulus, relaxTime, c, t1):
     except ValueError:
         dt = 10*10**(-3)
     t2 = t1 + dt
-    tim = np.linspace(t1, t2, int((t2-t1)*10**3 /2))
+    tim = np.linspace(t1, t2, 500)
     strain = np.array([c*t1 for t in tim])
     stress = np.array([c*modulus*relaxTime*(np.exp(t1/relaxTime) - 1)*np.exp(-t/relaxTime) for t in tim])
     stress = np.array(stress)
@@ -50,7 +50,7 @@ def func_Maxwell3(modulus, relaxTime, c, t1, t2):
     except ValueError:
         dt = 30*10**(-3)
     t3 = t2 + dt
-    tim = np.linspace(t2, t3, int((t3-t2)*10**3 /2))
+    tim = np.linspace(t2, t3, 500)
     strain = np.array([c*(t1 + t2 -t) for t in tim])
     stress = np.array([c*modulus*relaxTime*((np.exp(t1/relaxTime) + np.exp(t2/relaxTime) - 1)*np.exp(-t/relaxTime) - 1) for t in tim])
     stress = np.array(stress)
