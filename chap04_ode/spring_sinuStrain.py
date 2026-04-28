@@ -41,7 +41,7 @@ s = E*e
 # scaling for figure
 s = s/10**6                     # MPaスケール
 
-fig = plt.figure(figsize=(8,10), tight_layout=True)
+fig = plt.figure(figsize=(8,7), tight_layout=True)
 title_text = "spring (Hooke's elasticity): sinusoidal strain"
 fig.suptitle(title_text)
 ax1 = fig.add_subplot(211, xlabel='$t$ /s')
