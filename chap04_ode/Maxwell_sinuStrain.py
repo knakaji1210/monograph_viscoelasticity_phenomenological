@@ -23,9 +23,9 @@ try:
 except ValueError:
     E = 2*10**5                 # [Pa] modulus
 try:
-    eta = float(input('viscosity [kPa s] (default = 500.0 kPa s): '))*10**3
+    eta = float(input('viscosity [kPa s] (default = 100.0 kPa s): '))*10**3
 except ValueError:
-    eta = 5*10**5               # [Pa s] viscosity
+    eta = 10**5               # [Pa s] viscosity
 tau = eta/E                     # [s] relaxation time
 
 # external sinusoidal strain
@@ -34,16 +34,16 @@ try:
 except ValueError:
     eamp = 0.2
 try:
-    T = float(input('peirod for sinusoidal strain [s] (default=2.0): '))
+    f = float(input('frequency for sinusoidal strain [Hz] (default=0.5 Hz): '))
 except ValueError:
-    T = 2.0
+    f = 0.5
 
-af = 2*np.pi/T
+af = 2*np.pi*f
 
 s0 = 0                      # [] initial strain
 
-tmax = 4*T                  # [s] duration time
-dt = 0.01                   # [s] interval time
+tmax = 4/f                  # [s] duration time
+dt = 1/(40*f)               # [s] interval time
 t_a = np.arange(0, tmax, dt)    # time after step stress
 t_b = np.arange(-0.1*tmax,0,dt) # time before step stress
 t = np.concatenate([t_b,t_a])   # whole time 
@@ -77,11 +77,11 @@ ax2.set_xlim(t[0], t[-1])
 ax1.set_ylim(-1.5*np.max(e),1.5*np.max(e))
 ax2.set_ylim(-1.5*np.max(s),1.5*np.max(s))
 
-var_text = r'$\epsilon_{{amp}}$ = {0:.2f}, $T$ = {1:.1f} s, $E$ = {2:.1f} MPa, $\eta$ = {3:.1f} kPa s'.format(eamp,T,E/10**6,eta/10**3)
+var_text = r'$\epsilon_{{amp}}$ = {0:.2f}, $f$ = {1:.3f} Hz, $E$ = {2:.1f} MPa, $\eta$ = {3:.1f} kPa s'.format(eamp,f,E/10**6,eta/10**3)
 ax1.text(0.1, 0.9, var_text, transform=ax1.transAxes)
 eq_text = r'd$\sigma$/d$t$ = -$\sigma$/$\tau$ + $E$d$\epsilon$/d$t$'
 ax2.text(0.1, 0.9, eq_text, transform=ax2.transAxes)
-res_text = r'$\tau$ = {0:.1f} s'.format(tau)
+res_text = r'$\tau$ = {0:.3f} s, $\omega\tau$ = {1:.3f}'.format(tau, af*tau)
 ax2.text(0.1, 0.8, res_text, transform=ax2.transAxes)
 
 line_strain, = ax1.plot([], [], 'b', label='$\epsilon$ (input)')
@@ -105,7 +105,7 @@ def animate(i):
 # アニメーション実行
 ani = animation.FuncAnimation(fig, animate, frames=len(t), interval=20, blit=True)
 
-savefile = "./gif/Maxwell_sinuStrain_(T={0:.1f}s).gif".format(T)
+savefile = "./gif/Maxwell_sinuStrain_(f={0:.3f}Hz).gif".format(f)
 ani.save(savefile, writer='pillow', fps=50)
 
 plt.show()
