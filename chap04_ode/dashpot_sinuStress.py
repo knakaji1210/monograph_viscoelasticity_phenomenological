@@ -89,6 +89,6 @@ def animate(i):
 # アニメーション実行
 ani = animation.FuncAnimation(fig, animate, frames=len(t), interval=20, blit=True)
 
-#ani.save('./gif/dashpot_sinuStress_chart.gif', writer='pillow', fps=50)
+ani.save('./gif/dashpot_sinuStress_chart.gif', writer='pillow', fps=50)
 
 plt.show()
