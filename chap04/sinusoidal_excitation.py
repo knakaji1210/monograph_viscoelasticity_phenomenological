@@ -16,40 +16,43 @@ def reqParams():
 
     if select == 0:
         try:
-            strMod = float(input('Enter storage modulus value (MPa) (default = 1.0 MPa): '))*10**6
+            strMod = float(input('Enter storage modulus value (MPa) (default = 0.2 MPa): '))*10**6
         except ValueError:
-            strMod = 10**6
+            strMod = 0.2*10**6
         try:
-            losMod = float(input('Enter loss modulus value (MPa) (default = 0.5 MPa): '))*10**6
+            losMod = float(input('Enter loss modulus value (MPa) (default = 0.2 MPa): '))*10**6
         except ValueError:
-            losMod = 0.5*10**6
+            losMod = 0.2*10**6
         comMod = strMod + (2j/2)*losMod
+        figtext = r'$f$ = {0:.3f} Hz'.format(Freq)
         savefile = './png/sinusoidal_excitation_general.png'
 
     if select == 1:
         try:
-            strMod = float(input('Enter modulus value (MPa) (default = 1.0 MPa): '))*10**6
+            strMod = float(input('Enter modulus value (MPa) (default = 0.2 MPa): '))*10**6
         except ValueError:
-            strMod = 10**6
+            strMod = 0.2 * 10**6
         losMod = 0
         comMod = strMod + (2j/2)*losMod
+        figtext = r'$f$ = {0:.3f} Hz'.format(Freq)
         savefile = './png/sinusoidal_excitation_Hooke.png'    
 
     if select == 2:
         try:
-            viscosity = float(input('Enter viscosity value (kPa s) (default = 10.0 kPa s): '))*10**3
+            viscosity = float(input('Enter viscosity value (kPa s) (default = 100.0 kPa s): '))*10**3
         except ValueError:
             viscosity = 10**5
             losMod = angFreq*viscosity
         strMod = 0
         comMod = strMod + (2j/2)*losMod
+        figtext = r'$f$ = {0:.3f} Hz'.format(Freq)
         savefile = './png/sinusoidal_excitation_Newton.png'
     
     if select == 3:
         try:
-            insMod = float(input('Enter instantaneous modulus value (MPa) (default = 1.0 MPa): '))*10**6
+            insMod = float(input('Enter instantaneous modulus value (MPa) (default = 0.2 MPa): '))*10**6
         except ValueError:
-            insMod = 10**6
+            insMod = 0.2*10**6
         try:
             viscosity = float(input('Enter viscosity value (kPa s) (default = 100.0 kPa s): '))*10**3
         except ValueError:
@@ -58,7 +61,9 @@ def reqParams():
         numer = insMod*relaxTime*angFreq*(2j/2)
         denom = 1 + relaxTime*angFreq*(2j/2)
         comMod = numer/denom
-        savefile = './png/sinusoidal_excitation_Maxwell_(f={0:.1f}Hz).png'.format(Freq)
+        tau = viscosity/insMod
+        figtext = r'$\tau$ = {0:.2f} s, $f$ = {1:.3f} Hz, $\omega\tau$ = {2:.2f}'.format(tau, Freq, angFreq*tau)
+        savefile = './png/sinusoidal_excitation_Maxwell_(f={0:.2f}Hz).png'.format(Freq)
 
     if select == 4:
         try:
@@ -79,12 +84,13 @@ def reqParams():
         numer = insMod*(1/k + retardTime*angFreq*(2j/2))
         denom = 1 + retardTime*angFreq*(2j/2)
         comMod = numer/denom
+        figtext = r'$f$ = {0:.3f} Hz'.format(Freq)
         savefile = './png/sinusoidal_excitation_slsII.png'
 
-    return angFreq, comMod, savefile
+    return angFreq, comMod, figtext, savefile
 
 def calc_compStrain(angFreq):
-    strain_amp = 1
+    strain_amp = 0.25
     time_min = 0
     period = 2*np.pi/angFreq
     time_max = period*3
@@ -102,7 +108,7 @@ def calc_compStress(compStrain, comMod):
 
 
 if __name__=='__main__':
-    angFreq, comMod, savefile = reqParams()
+    angFreq, comMod, figtext, savefile = reqParams()
     timeInfo, compStrain = calc_compStrain(angFreq)
     time_min = timeInfo[0]
     time_max = timeInfo[1]
@@ -133,7 +139,8 @@ if __name__=='__main__':
     ax1.legend(h1+h2, l1+l2, loc='upper right')
     ax1.grid()
 
-    fig.text(0.15, 0.15, '$f$ = {0:.3f} Hz'.format(angFreq/(2*np.pi)))
+    fig.text(0.15, 0.15, figtext)
+
     fig.savefig(savefile, dpi=300)
 
     plt.show()
