@@ -27,7 +27,7 @@ except ValueError:
 af = 2*np.pi/T
 
 tmax = 4*T                      # [s] duration time
-dt = 0.01                       # [s] interval time
+dt = T/40                       # [s] interval time
 t_a = np.arange(0, tmax, dt)    # time after step stress
 t_b = np.arange(-0.1*tmax,0,dt) # time before step stress
 t = np.concatenate([t_b,t_a])   # whole time 
