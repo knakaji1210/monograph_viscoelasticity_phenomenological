@@ -24,9 +24,9 @@ except ValueError:
 
 # external sinusoidal strain
 try:
-    samp = float(input('amplitude for sinusoidal stress [MPa] (default=0.2): '))*10**6
+    samp = float(input('amplitude for sinusoidal stress [MPa] (default=0.05): '))*10**6
 except ValueError:
-    samp = 0.2*10**6
+    samp = 0.05*10**6
 try:
     freq = float(input('frequency for sinusoidal stress [Hz] (default=1.0 Hz): '))
 except ValueError:

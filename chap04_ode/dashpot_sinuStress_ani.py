@@ -28,9 +28,9 @@ w = 0.5                     # ratio of dashpot width
 
 # external sinusoidal strain
 try:
-    samp = float(input('amplitude for sinusoidal stress [MPa] (default=0.1): '))*10**6
+    samp = float(input('amplitude for sinusoidal stress [MPa] (default=0.05): '))*10**6
 except ValueError:
-    samp = 0.1*10**6
+    samp = 0.05*10**6
 try:
     freq = float(input('frequency for sinusoidal stress [Hz] (default=1.0 Hz): '))
 except ValueError:
@@ -40,7 +40,7 @@ af = 2*np.pi*freq
 e0 = 0
 
 tmax = 5/freq                   # [s] duration time
-dt = 1/(20*freq)                # [s] interval time
+dt = 1/(40*freq)                # [s] interval time
 t_a = np.arange(0, tmax, dt)    # time after step stress
 t_b = np.arange(-2.0,0,dt) # time before step stress
 t = np.concatenate([t_b,t_a])   # whole time 
