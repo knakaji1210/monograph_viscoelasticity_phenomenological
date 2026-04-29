@@ -28,15 +28,15 @@ try:
 except ValueError:
     samp = 0.2*10**6
 try:
-    T = float(input('peirod for sinusoidal strain [s] (default=1.0): '))
+    freq = float(input('frequency for sinusoidal stress [Hz] (default=1.0 Hz): '))
 except ValueError:
-    T = 1.0
+    freq = 1.0
 
-af = 2*np.pi/T
+af = 2*np.pi*freq
 e0 = 0.0
 
-tmax = 4*T                  # [s] duration time
-dt = T/40                   # [s] interval time
+tmax = 4/freq                   # [s] duration time
+dt = 1/(40*freq)                # [s] interval time
 t_a = np.arange(0, tmax, dt)    # time after step stress
 t_b = np.arange(-0.1*tmax,0,dt) # time before step stress
 t = np.concatenate([t_b,t_a])   # whole time 
@@ -67,7 +67,7 @@ ax2.set_xlim(t[0], t[-1])
 ax1.set_ylim(-1.5*np.max(s),1.5*np.max(s))
 ax2.set_ylim(-1.5*np.max(e),1.5*np.max(e))
 
-var_text = r'$\sigma_{{amp}}$ = {0:.2f} MPa, $T$ = {1:.1f} s, $\eta$ = {2:.1f} kPa s'.format(samp/10**6,T,eta/10**3)
+var_text = r'$\sigma_{{amp}}$ = {0:.2f} MPa, $f$ = {1:.1f} Hz, $\eta$ = {2:.1f} kPa s'.format(samp/10**6,freq,eta/10**3)
 ax1.text(0.1, 0.9, var_text, transform=ax1.transAxes)
 eq_text = r'd$\epsilon$/d$t$ = $\sigma$/$\eta$'
 ax2.text(0.1, 0.9, eq_text, transform=ax2.transAxes)
@@ -89,6 +89,7 @@ def animate(i):
 # アニメーション実行
 ani = animation.FuncAnimation(fig, animate, frames=len(t), interval=20, blit=True)
 
-ani.save('./gif/dashpot_sinuStress_chart.gif', writer='pillow', fps=50)
+savefile = "./gif/dashpot_sinuStress_(f={0:.2f}Hz).gif".format(freq)
+ani.save(savefile, writer='pillow', fps=50)
 
 plt.show()

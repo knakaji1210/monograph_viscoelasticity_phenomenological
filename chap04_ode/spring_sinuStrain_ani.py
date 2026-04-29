@@ -24,16 +24,16 @@ try:
 except ValueError:
     eamp = 0.25
 try:
-    T = float(input('peirod for sinusoidal strain [s] (default=2.0): '))
+    freq = float(input('frequency for sinusoidal strain [Hz] (default=1.0 Hz): '))
 except ValueError:
-    T = 2.0
+    freq = 1.0
 
-af = 2*np.pi/T
+af = 2*np.pi*freq
 
-tmax = 5*T                   # [s] duration time
-dt = 0.1                   # [s] interval time
+tmax = 5/freq                   # [s] duration time
+dt = 1/(20*freq)                # [s] interval time
 t_a = np.arange(0, tmax, dt)    # time after step stress
-t_b = np.arange(-2.0,0,dt) # time before step stress
+t_b = np.arange(-2.0,0,dt)      # time before step stress
 t = np.concatenate([t_b,t_a])   # whole time 
 zeros = np.zeros(len(t_b))
 e_a = np.array([eamp*np.sin(af*t) for t in t_a])
@@ -64,7 +64,7 @@ ax.plot([0,l],[-2,-2], c='g')
 ax.plot([0,0],[-1.8,-2.2], c='g')
 ax.plot([l,l],[-1.8,-2.2], c='g')
 
-var_text = r'$\epsilon_{{amp}}$ = {0:.2f}, $T$ = {1:.1f} s, $E$ = {2:.1f} MPa'.format(eamp,T,E/10**6)
+var_text = r'$\epsilon_{{amp}}$ = {0:.2f}, $f$ = {1:.3f} Hz, $E$ = {2:.1f} MPa'.format(eamp,freq,E/10**6)
 ax.text(0.4, 0.9, var_text, transform=ax.transAxes)
 eq_text = r'$\sigma$ = $E\epsilon$'
 ax.text(0.4, 0.8, eq_text, transform=ax.transAxes)
@@ -114,7 +114,7 @@ fps = 1000/frame_int        # frames per second
 ani = FuncAnimation(fig, update, frames=f, 
                     init_func=init, blit=True, interval=frame_int, repeat=False)
 
-savefile = "./gif/spring_sinuStrain_(epsilon={0:.2f},T={1:.1f}s,mod={2:.1f}MPa).gif".format(eamp,T,E/10**6)
+savefile = "./gif/spring_sinuStrain_ani_(f={0:.2f}Hz).gif".format(freq)
 ani.save(savefile, writer='pillow', fps=fps)
 
 plt.show()

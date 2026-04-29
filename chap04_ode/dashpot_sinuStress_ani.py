@@ -19,9 +19,9 @@ def dashpot_sinuStress(e, t, samp, af, eta):
 
 # variables
 try:
-    eta = float(input('viscosity [kPa s] (default = 500.0 kPa s): '))*10**3
+    eta = float(input('viscosity [kPa s] (default = 100.0 kPa s): '))*10**3
 except ValueError:
-    eta = 5*10**5           # [Pa s] viscosity
+    eta = 10**5           # [Pa s] viscosity
 
 l = 0.1                     # [m] equilibrium length
 w = 0.5                     # ratio of dashpot width
@@ -32,15 +32,15 @@ try:
 except ValueError:
     samp = 0.1*10**6
 try:
-    T = float(input('peirod for sinusoidal strain [s] (default=2.0): '))
+    freq = float(input('frequency for sinusoidal stress [Hz] (default=1.0 Hz): '))
 except ValueError:
-    T = 2.0
+    freq = 1.0
 
-af = 2*np.pi/T
+af = 2*np.pi*freq
 e0 = 0
 
-tmax = 5*T                  # [s] duration time
-dt = 0.1                   # [s] interval time
+tmax = 5/freq                   # [s] duration time
+dt = 1/(20*freq)                # [s] interval time
 t_a = np.arange(0, tmax, dt)    # time after step stress
 t_b = np.arange(-2.0,0,dt) # time before step stress
 t = np.concatenate([t_b,t_a])   # whole time 
@@ -83,7 +83,7 @@ ax.plot([0,l],[-2,-2], c='g')
 ax.plot([0,0],[-1.8,-2.2], c='g')
 ax.plot([l,l],[-1.8,-2.2], c='g')
 
-var_text = r'$\sigma_{{amp}}$ = {0:.2f} MPa, $T$ = {1:.1f} s, $\eta$ = {2:.1f} kPa s'.format(samp/10**6,T,eta/10**3)
+var_text = r'$\sigma_{{amp}}$ = {0:.2f} MPa, $f$ = {1:.3f} Hz, $\eta$ = {2:.1f} kPa s'.format(samp/10**6,freq,eta/10**3)
 ax.text(0.4, 0.9, var_text, transform=ax.transAxes)
 eq_text = r'd$\epsilon$/d$t$ = $\sigma$/$\eta$'
 ax.text(0.4, 0.8, eq_text, transform=ax.transAxes)
@@ -135,7 +135,7 @@ fps = 1000/frame_int        # frames per second
 ani = FuncAnimation(fig, update, frames=f, 
                     init_func=init, blit=True, interval=frame_int, repeat=False)
 
-savefile = "./gif/dashpot_sinuStress_ani_(sigma={0:.2f}MPa,T={1:.1f}s,eta={2:.1f}kPas).gif".format(samp/10**6,T,eta/10**3)
+savefile = "./gif/dashpot_sinuStress_ani_(f={0:.3f}Hz).gif".format(freq)
 ani.save(savefile, writer='pillow', fps=fps)
 
 plt.show()
