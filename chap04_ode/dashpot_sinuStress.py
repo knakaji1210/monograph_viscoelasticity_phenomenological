@@ -18,9 +18,9 @@ def dashpot_sinuStress(e, t, samp, af, eta):
 
 # variables
 try:
-    eta = float(input('viscosity [kPa s] (default = 500.0 kPa s): '))*10**3
+    eta = float(input('viscosity [kPa s] (default = 100.0 kPa s): '))*10**3
 except ValueError:
-    eta = 5*10**5             # [Pa s] viscosity
+    eta = 10**5             # [Pa s] viscosity
 
 # external sinusoidal strain
 try:
@@ -36,7 +36,7 @@ af = 2*np.pi/T
 e0 = 0.0
 
 tmax = 4*T                  # [s] duration time
-dt = 0.01                   # [s] interval time
+dt = T/40                   # [s] interval time
 t_a = np.arange(0, tmax, dt)    # time after step stress
 t_b = np.arange(-0.1*tmax,0,dt) # time before step stress
 t = np.concatenate([t_b,t_a])   # whole time 
