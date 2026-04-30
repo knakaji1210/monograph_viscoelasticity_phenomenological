@@ -10,12 +10,18 @@ def creep_compliance(t_elapsed, J0, J_inf, eta, tau):
 
 # 1. データ準備
 stress_i = 1.0  # ステップ応力の大きさ
-t = np.linspace(-2, 10, 500)
+start_time = -2.0  # 開始時間
+end_time = 8.0    # 終了時間
+time_duration = end_time - start_time  # [s]
+fps = 30
+steps = int(time_duration * fps) + 1
+interval_ms = 1000 / fps  # 1コマあたりのミリ秒
+t = np.linspace(start_time, end_time, steps)
 t0 = 0.0    # 荷重（応力）を加える時刻
 J0 = 2.0    # 瞬間コンプライアンス
 J_inf = 4.0 # 定常コンプライアンス
 eta = 1.0   # 粘性係数（本来はtau/J0である）
-tau = 2.0   # 遅延時間
+tau = 2.5   # 遅延時間
 
 # 各荷重による個別の歪み応答
 strain1 = stress_i * creep_compliance(t - t0, J0, J_inf, eta, tau)
@@ -26,7 +32,7 @@ strain3 = stress_i * creep_compliance(t - t0, J0, J0, eta, tau)     # 緩和項�
 fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(8, 7), sharex=True)
 
 # --- 上段：応力 (Input) ---
-ax1.set_xlim(-2, 10)
+ax1.set_xlim(start_time, end_time)
 ax1.set_ylim(-0.2, 2.0) # 縦軸固定
 ax1.set_ylabel('Applied Stress, $\sigma$ /MPa')
 ax1.set_title('Creep ($J_0$ = {0:.1f} MPa$^{{-1}}$, $J_\\infty$ = {1:.1f} MPa$^{{-1}}$, $\\eta$ = {2:.1f} MPa$\cdot$s, $\\tau$ = {3:.1f} s)'.format(J0, J_inf, eta, tau))
@@ -35,7 +41,7 @@ line_stress, = ax1.step([], [], where='post', color='blue', lw=2, label='Step st
 ax1.legend(loc='upper right')
 
 # --- 下段：歪み (Response) ---
-ax2.set_xlim(-2, 10)
+ax2.set_xlim(start_time, end_time)
 ax2.set_ylim(-0.2, 15.0) # 縦軸固定
 ax2.set_xlabel('Time /s')
 ax2.set_ylabel('Strain, $\epsilon$ /')
@@ -60,9 +66,10 @@ def animate(i):
     return line_stress, line_stress1, line_stress2, line_stress3
 
 # アニメーション実行
-ani = animation.FuncAnimation(fig, animate, frames=len(t), interval=20, blit=True)
+ani = animation.FuncAnimation(fig, animate, frames=steps, interval=interval_ms, blit=True)
 
-ani.save('./gif/Creep.gif', dpi=300)
+savefile = './mp4/Creep.mp4'
+ani.save(savefile, writer='ffmpeg', fps=fps, extra_args=['-r', '30'])
 
 plt.tight_layout()
 plt.show()

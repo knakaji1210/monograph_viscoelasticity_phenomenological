@@ -10,11 +10,17 @@ def relaxation_modulus(t_elapsed, E_inf, E_i, tau):
 
 # 1. データ準備
 strain_i = 1.0  # ステップ歪みの大きさ
-t = np.linspace(-2, 10, 400)
+start_time = -2.0  # 開始時間
+end_time = 8.0    # 終了時間
+time_duration = end_time - start_time  # [s]
+fps = 30
+steps = int(time_duration * fps) + 1
+interval_ms = 1000 / fps  # 1コマあたりのミリ秒
+t = np.linspace(start_time, end_time, steps)
 t0 = 0.0        # ステップ歪みを加える時刻
 E_inf = 1.0     # 平衡弾性率
 E_i = 3.0       # 瞬間弾性率
-tau = 3.0       # 緩和時間
+tau = 2.5       # 緩和時間
 stress1 = strain_i * relaxation_modulus(t - t0, E_inf, E_i, tau)
 stress2 = strain_i * relaxation_modulus(t - t0, E_inf, E_inf, tau)
 
@@ -22,7 +28,7 @@ stress2 = strain_i * relaxation_modulus(t - t0, E_inf, E_inf, tau)
 fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(8, 7), sharex=True)
 
 # --- 上段：歪み (Input) ---
-ax1.set_xlim(-2, 10)
+ax1.set_xlim(start_time, end_time)
 ax1.set_ylim(-0.2, 2.0) # 縦軸を固定
 ax1.set_ylabel('Applied Strain, $\epsilon$ /')
 ax1.set_title('Strees Relaxation ($E_i$ = {0:.1f} MPa, $E_\\infty$ = {1:.1f} MPa, $\\tau$ = {2:.1f} s)'.format(E_i, E_inf, tau))
@@ -32,7 +38,7 @@ line_strain, = ax1.step([], [], where='post', color='blue', lw=2, label='Step st
 ax1.legend(loc='upper right')
 
 # --- 下段：応力 (Response) ---
-ax2.set_xlim(-2, 10)
+ax2.set_xlim(start_time, end_time)
 ax2.set_ylim(-0.4, 4.0) # 縦軸を固定
 ax2.set_xlabel('Time /s')
 ax2.set_ylabel('Stress, $\sigma$ /MPa')
@@ -54,10 +60,11 @@ def animate(i):
     line_stress2.set_data(t[:i], stress2[:i])
     return line_strain, line_stress1, line_stress2
 
-# アニメーション実行
-ani = animation.FuncAnimation(fig, animate, frames=len(t), interval=25, blit=True)
+# アニメーション実行   
+ani = animation.FuncAnimation(fig, animate, frames=steps, interval=interval_ms, blit=True)
 
-ani.save('./gif/Stress_relaxation.gif', dpi=300)
+savefile = './mp4/Stress_relaxation.mp4'
+ani.save(savefile, writer='ffmpeg', fps=fps, extra_args=['-r', '30'])
 
 plt.tight_layout()
 plt.show()
