@@ -123,7 +123,7 @@ def update(i):              # ここのiは下のframes=np.arange(0, len(t))に�
 ani = animation.FuncAnimation(fig, update, frames=steps, 
                     init_func=init, blit=True, interval=interval_ms, repeat=False)
 
-savefile = "./gif/dashpot_stepStress_ani.gif"
+savefile = "./mp4/dashpot_stepStress_ani.mp4"
 ani.save(savefile, writer='ffmpeg', fps=fps, extra_args=['-r', '30'])
 
 plt.show()
