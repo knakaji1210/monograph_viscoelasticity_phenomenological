@@ -22,9 +22,9 @@ except ValueError:
     strain_i = 0.1         # step strain
 
 # ODE解析で用いる関数の定義
-def spring_stepStrain(s, t, e, eta):
-# e: strain, s: stress, eta: viscosity
-# ここでは下でargsとしてs=stress_iを入れてステップ応力を実現
+def spring_stepStrain(s, t, e, E):
+# e: strain, s: stress, E: modulus
+# ここでは下でargsとしてe0=strain_iを入れてステップ歪みを実現
     dsdt = 0    # バネ要素単独では応力は時間変化しないため
     return dsdt
 
