@@ -1,13 +1,14 @@
 # ordinary differential equation of spring (step strain) with animation
-'''
-バネ要素単独では常微分方程式は不要
-'''
 
 import numpy as np
 from scipy.integrate import odeint
 import matplotlib.pyplot as plt
 from matplotlib import patches
 import matplotlib.animation as animation
+
+'''
+バネ要素単独では常微分方程式は不要だが、形式的にODEの形で表現してみる
+'''
 
 # variables
 try:
@@ -23,27 +24,41 @@ try:
 except ValueError:
     strain_i = 0.5         # step strain
 
-# 瞬間弾性率の定義
-def instantaneous_modulus(t_elapsed, E_i):
-    return np.where(t_elapsed >= 0, E_i, 0)
+# ODE解析で用いる関数の定義
+def spring_stepStrain(s, t, e, eta):
+# e: strain, s: stress, eta: viscosity
+# ここでは下でargsとしてs=stress_iを入れてステップ応力を実現
+    dsdt = 0    # バネ要素単独では応力は時間変化しないため
+    return dsdt
 
 # 1. データ準備
 start_time = -2.0   # 開始時間
 end_time = 8.0      # 終了時間
+event_time = 0.0    # ステップ歪みを加える時刻
 time_duration = end_time - start_time  # [s]
+time_duration_pre = event_time - start_time
+time_duration_post = end_time - event_time
 fps = 30
 steps = int(time_duration * fps) + 1
 interval_ms = 1000 / fps  # 1コマあたりのミリ秒
 t = np.linspace(start_time, end_time, steps)
-t0 = 0.0            # ステップ歪みを加える時刻
+t_pre = t[t < event_time]
+t_post = t[t >= event_time]
 
-# solution of ODE（ここではそれをする必要はない）
-stress = strain_i * instantaneous_modulus(t - t0, E)
-e = np.where(t - t0 >= 0, strain_i, 0)
-el = e*l                        # [m] elongation
+strain = np.where(t - event_time >= 0, strain_i, 0)
+
+# solution of ODE
+e0 = strain_i       # ODEの引数として入れるためにこの形で定義
+s0 = E * strain_i   # バネ要素の応力はステップ歪みに対して即座に応答するため、初期条件として定義
+sol = odeint(spring_stepStrain, s0, t_post, args=(e0,E))
+stress_pre = np.zeros_like(t_pre)  # ステップ前の応力はゼロ
+stress_post = sol[:, 0]  # 応力履歴
+stress = np.concatenate([stress_pre, stress_post])
 
 # scaling for figure
-s = stress/10**6                     # MPaスケール
+e = strain/1.0     # 描画のためのスケーリング
+s = stress/10**6   # 描画のためのスケーリング ([MPa]単位に変換)
+el = e*l           # [m] elongation
 
 # 2. グラフの初期設定
 fig = plt.figure(figsize=(8,5), tight_layout=True)
