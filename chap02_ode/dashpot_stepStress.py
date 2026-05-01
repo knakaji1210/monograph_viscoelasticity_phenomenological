@@ -96,7 +96,7 @@ def animate(i):
 ani = animation.FuncAnimation(fig, animate, frames=steps, interval=interval_ms, blit=True)
 
 savefile = './mp4/dashpot_stepStress.mp4'
-#ani.save(savefile, writer='ffmpeg', fps=fps, extra_args=['-r', '30'])
+ani.save(savefile, writer='ffmpeg', fps=fps, extra_args=['-r', '30'])
 
 plt.tight_layout()
 plt.show()
