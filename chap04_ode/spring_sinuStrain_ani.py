@@ -1,13 +1,14 @@
 # ordinary differential equation of spring (sinusoidal strain) with animation
-'''
-バネ要素単独では常微分方程式は不要
-'''
 
 import numpy as np
 from scipy.integrate import odeint
 import matplotlib.pyplot as plt
 from matplotlib import patches
-from matplotlib.animation import FuncAnimation
+import matplotlib.animation as animation
+
+'''
+バネ要素単独では常微分方程式は不要だが、形式的にODEの形で表現してみる
+'''
 
 # variables
 try:
@@ -24,27 +25,48 @@ try:
 except ValueError:
     eamp = 0.25
 try:
-    freq = float(input('frequency for sinusoidal strain [Hz] (default=1.0 Hz): '))
+    freq = float(input('frequency for sinusoidal strain [Hz] (default=0.5 Hz): '))
 except ValueError:
-    freq = 1.0
+    freq = 0.5
 
 af = 2*np.pi*freq
 
-tmax = 5/freq                   # [s] duration time
-dt = 1/(40*freq)                # [s] interval time
-t_a = np.arange(0, tmax, dt)    # time after step stress
-t_b = np.arange(-2.0,0,dt)      # time before step stress
-t = np.concatenate([t_b,t_a])   # whole time 
-zeros = np.zeros(len(t_b))
-e_a = np.array([eamp*np.sin(af*t) for t in t_a])
-e = np.concatenate([zeros,e_a]) # whole strain
+# ODE解析で用いる関数の定義
+def spring_sinuStrain(s, t, eamp, af, E):
+# e: strain, s: stress, E: modulus
+# ここではeampとafを指定し、この中でeの関数を作り振動歪みを実現
+    e = eamp*np.sin(af*t)           # 振動歪みの関数
+    dsdt = E*eamp*af*np.cos(af*t)   # ds/dt = E*de/dt = E*eamp*af*cos(af*t)
+    return dsdt
 
-# solution of ODE（ここではそれをする必要はない）
-s = E*e
-el = e*l                        # [m] elongation
+# 1. データ準備
+start_time = -2.0   # 開始時間
+end_time = 4/freq   # 終了時間
+event_time = 0.0    # 振動歪みを加える時刻
+time_duration = end_time - start_time  # [s]
+time_duration_pre = event_time - start_time
+time_duration_post = end_time - event_time
+fps = 60    # fps = 30だと足りないので60に変更 
+steps = int(time_duration * fps) + 1
+interval_ms = 1000 / fps  # 1コマあたりのミリ秒
+t = np.linspace(start_time, end_time, steps)
+t_pre = t[t < event_time]
+t_post = t[t >= event_time]
+
+strain_post = eamp*np.sin(af*t)  # 振動歪みの関数
+strain = np.where(t - event_time >= 0, strain_post, 0)
+
+# solution of ODE
+s0 = 0                              # 初期条件として定義
+sol = odeint(spring_sinuStrain, s0, t_post, args=(eamp,af,E))
+stress_pre = np.zeros_like(t_pre)   # ステップ前の応力はゼロ
+stress_post = sol[:, 0]             # 応力履歴
+stress = np.concatenate([stress_pre, stress_post])
 
 # scaling for figure
-s = s/10**6                     # MPaスケール
+e = strain/1.0     # 描画のためのスケーリング
+s = stress/10**6   # 描画のためのスケーリング ([MPa]単位に変換)
+el = e*l           # [m] elongation
 
 fig = plt.figure(figsize=(8,5), tight_layout=True)
 ax = fig.add_subplot(111)
@@ -107,14 +129,12 @@ def update(i):              # ここのiは下のframes=np.arange(0, len(t))に�
     time_text.set_text(time_template % (t[i]))
     return rod, triangle, point, stress, arrow_p, arrow_n, time_text
 
-f = np.arange(0, len(t))
-frame_int = 1000 * dt       # [ms] interval between frames
-fps = 1000/frame_int        # frames per second
+# アニメーション実行   
+ani = animation.FuncAnimation(fig, update, frames=steps, 
+                    init_func=init, blit=True, interval=interval_ms, repeat=False)
 
-ani = FuncAnimation(fig, update, frames=f, 
-                    init_func=init, blit=True, interval=frame_int, repeat=False)
+savefile = './mp4/spring_sinuStrain_ani_(f={0:.2f}Hz).mp4'.format(freq)
+ani.save(savefile, writer='ffmpeg', fps=fps, extra_args=['-r', '60'])
 
-savefile = "./gif/spring_sinuStrain_ani_(f={0:.2f}Hz).gif".format(freq)
-ani.save(savefile, writer='pillow', fps=fps)
-
+plt.tight_layout()
 plt.show()
