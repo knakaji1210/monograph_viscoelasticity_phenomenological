@@ -4,18 +4,11 @@ import numpy as np
 from scipy.integrate import odeint
 import matplotlib.pyplot as plt
 from matplotlib import patches
-from matplotlib.animation import FuncAnimation
+import matplotlib.animation as animation
 
 '''
 テキストの式(2.12)をベースに組み立てる
 '''
-
-def Maxwell_stepStrain(s, t, tau):
-# e: strain, s: stress, tau: retardation time
-# ステップ歪みe=e0を加えるので、式(2.11)のde/dtの項が0となっている
-    tau = eta/E                 # retardation time [s]
-    dsdt = -s/tau               # (2.12)
-    return dsdt
 
 # variables
 try:
@@ -26,40 +19,62 @@ try:
     eta = float(input('viscosity [kPa s] (default = 500.0 kPa s): '))*10**3
 except ValueError:
     eta = 5*10**5               # [Pa s] viscosity
+
 tau = eta/E                     # [s] retardation time
 l = 0.1                         # [m] equilibrium length
 w = 0.5                         # ratio of dashpot width
 
 # initial condition
 try:
-    e0 = float(input('step strain [] (default = 0.2): '))
+    strain_i = float(input('step strain [] (default = 0.2): '))
 except ValueError:
-    e0 = 0.2               # [] step strain
-s0 = E*e0                  # [Pa] initial stress
+    strain_i = 0.2               # [] step strain
 
-tmax = 10                   # [s] duration time
-dt = 0.05                   # [s] interval time
-t_a = np.arange(0, tmax, dt)    # time after step stress
-t_b = np.arange(-2.0,0,dt) # time before step stress
-t = np.concatenate([t_b,t_a])   # whole time 
-zeros = np.zeros(len(t_b))
-ones = np.ones(len(t_a))
-e = np.concatenate([zeros,ones*e0])
-# 直列なのでl0=2lとなっている
-el = e*2*l                                  # [m] elongation
+# ODE解析で用いる関数の定義
+def Maxwell_stepStrain(s, t, tau):
+# e: strain, s: stress, tau: retardation time
+# ステップ歪みe0=strain_iを加えるので、式(2.11)のde/dtの項が0となっている
+    dsdt = -s/tau               # (2.12)
+    return dsdt
+
+# 1. データ準備
+start_time = -2.0   # 開始時間
+end_time = 8.0      # 終了時間
+event_time = 0.0    # ステップ歪みを加える時刻
+time_duration = end_time - start_time  # [s]
+time_duration_pre = event_time - start_time
+time_duration_post = end_time - event_time
+fps = 30
+steps = int(time_duration * fps) + 1
+interval_ms = 1000 / fps  # 1コマあたりのミリ秒
+t = np.linspace(start_time, end_time, steps)
+t_pre = t[t < event_time]
+t_post = t[t >= event_time]
+
+strain = np.where(t - event_time >= 0, strain_i, 0)
 
 # solution of ODE
-sol = odeint(Maxwell_stepStrain, s0, t_a, args=(tau,))
-s = np.concatenate([zeros,sol[:,0]])        # [] stress
-integral_s = np.array([s[:k+1].sum()*dt for k in range(len(s))])     # 簡易的なsの積分
-e_s = s/E                                   # strain on spring
-e_d = integral_s/eta                        # strain on dashpot
-el_s = e_s*2*l                              # [m] elongation of spring
-el_d = e_d*2*l                              # [m] elongation of dashpot
+e0 = strain_i       # ODEの引数として入れるためにこの形で定義
+s0 = E * strain_i   # バネ要素の応力はステップ歪みに対して即座に応答するため、初期条件として定義
+sol = odeint(Maxwell_stepStrain, s0, t_post, args=(tau,))
+stress_pre = np.zeros_like(t_pre)  # ステップ前の応力はゼロ
+stress_post = sol[:, 0]  # 応力履歴
+stress = np.concatenate([stress_pre, stress_post])
+
+dt = t[1] - t[0]   # 時間刻み
+integral_stress = np.array([stress[:k+1].sum()*dt for k in range(len(stress))])     # 簡易的なsの積分
 
 # scaling for figure
-s = s/10**6                     # MPaスケール
+e = strain/1.0     # 描画のためのスケーリング
+s = stress/10**6   # 描画のためのスケーリング ([MPa]単位に変換)
+e_s = s/(E/10**6)  # バネの歪み
+e_d = integral_stress/eta   # ダッシュポットの歪み
+# 直列なのでl0=2*lとなっている
+el = e*2*l         # [m] 全体の伸び
+el_s = e_s*2*l     # [m] バネの伸び
+el_d = e_d*2*l     # [m] ダッシュポットの伸び
 
+# 2. グラフの初期設定
 fig = plt.figure(figsize=(8,5), tight_layout=True)
 ax = fig.add_subplot(111, xlabel='$t$ /s')
 ax.grid()
@@ -86,7 +101,7 @@ ax.plot([0.08*l,0.08*l],[w,-w], c='b')
 rect = patches.Rectangle(xy=(0.08*l, -w), width=0.83*l, height=2*w, facecolor='y')
 ax.add_patch(rect)
 
-var_text = r'$\epsilon_0$ = {0:.1f}, $E$ = {1:.1f} MPa, $\eta$ = {2:.1f} kPa s'.format(e0,E/10**6,eta/10**3)
+var_text = r'$\epsilon_0$ = {0:.1f}, $E$ = {1:.1f} MPa, $\eta$ = {2:.1f} kPa s'.format(strain_i,E/10**6,eta/10**3)
 ax.text(0.5, 0.9, var_text, transform=ax.transAxes)
 eq_text = r'd$\sigma$/d$t$ = -$\sigma$/$\tau$'
 ax.text(0.5, 0.8, eq_text, transform=ax.transAxes)
@@ -144,14 +159,10 @@ x_tri1 = np.linspace(a, b,100)
 になる 
 '''
 
-f = np.arange(0, len(t))
-frame_int = 1000 * dt       # [ms] interval between frames
-fps = 1000/frame_int        # frames per second
+ani = animation.FuncAnimation(fig, update, frames=steps, 
+                    init_func=init, blit=True, interval=interval_ms, repeat=False)
 
-ani = FuncAnimation(fig, update, frames=f, 
-                    init_func=init, blit=True, interval=frame_int, repeat=False)
-
-savefile = "./gif/Maxwell_stepStrain.gif"
-ani.save(savefile, writer='pillow', fps=fps)
+savefile = "./mp4/Maxwell_stepStrain_ani.mp4"
+ani.save(savefile, writer='ffmpeg', fps=fps, extra_args=['-r', '30'])
 
 plt.show()
