@@ -72,8 +72,7 @@ fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(8, 7), sharex=True)
 
 # --- 上段：歪み (Input) ---
 ax1.set_xlim(start_time, end_time)
-#ax1.set_ylim(-np.max(e)*0.5, np.max(e)*1.5) # 縦軸を固定
-ax1.set_ylim(-np.max(e_d)*0.1, np.max(e_d)*1.5) # 縦軸を固定
+ax1.set_ylim(-np.max(e)*0.5, np.max(e)*1.5) # 縦軸を固定
 ax1.set_ylabel('Applied Strain, $\epsilon$ /')
 ax1.set_title("Maxwell model: step strain")
 ax1.grid(True, ls='--')
