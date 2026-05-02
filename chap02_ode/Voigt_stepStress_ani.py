@@ -61,8 +61,9 @@ strain_pre = np.zeros_like(t_pre)  # ステップ前の歪みはゼロ
 strain_post = sol[:, 0]     # 歪み履歴
 strain = np.concatenate([strain_pre, strain_post])
 
-dt = t[1] - t[0]   # 時間刻み
-dedt = np.array([0.0]+[(strain[k+1]-strain[k])/(t[k+1]-t[k]) for k in range(len(strain)-1)])     # 簡易的なde/dt
+#dt = t[1] - t[0]   # 時間刻み
+#dedt = np.array([0.0]+[(strain[k+1]-strain[k])/(t[k+1]-t[k]) for k in range(len(strain)-1)])   # 簡易的な歪みの微分
+dedt = np.gradient(strain, t)                                                                   # numpyを使った歪みの微分
 
 # scaling for figure
 e = strain/1.0          # 描画のためのスケーリング

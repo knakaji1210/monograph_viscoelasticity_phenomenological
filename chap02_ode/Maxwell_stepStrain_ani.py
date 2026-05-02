@@ -2,6 +2,7 @@
 
 import numpy as np
 from scipy.integrate import odeint
+from scipy import integrate
 import matplotlib.pyplot as plt
 from matplotlib import patches
 import matplotlib.animation as animation
@@ -61,8 +62,9 @@ stress_pre = np.zeros_like(t_pre)  # ステップ前の応力はゼロ
 stress_post = sol[:, 0]  # 応力履歴
 stress = np.concatenate([stress_pre, stress_post])
 
-dt = t[1] - t[0]   # 時間刻み
-integral_stress = np.array([stress[:k+1].sum()*dt for k in range(len(stress))])     # 簡易的なsの積分
+#dt = t[1] - t[0]   # 時間刻み
+#integral_stress = np.array([stress[:k+1].sum()*dt for k in range(len(stress))])     # 簡易的な応力の積分
+integral_stress = integrate.cumulative_trapezoid(stress, t, initial=0)               # scipyを使った応力の積分
 
 # scaling for figure
 e = strain/1.0     # 描画のためのスケーリング

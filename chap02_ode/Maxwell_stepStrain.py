@@ -2,6 +2,7 @@
 
 import numpy as np
 from scipy.integrate import odeint
+from scipy import integrate
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
@@ -58,8 +59,9 @@ stress_pre = np.zeros_like(t_pre)  # ステップ前の応力はゼロ
 stress_post = sol[:, 0]  # 応力履歴
 stress = np.concatenate([stress_pre, stress_post])
 
-dt = t[1] - t[0]   # 時間刻み
-integral_stress = np.array([stress[:k+1].sum()*dt for k in range(len(stress))])     # 簡易的なsの積分
+#dt = t[1] - t[0]   # 時間刻み
+#integral_stress = np.array([stress[:k+1].sum()*dt for k in range(len(stress))])     # 簡易的な応力の積分
+integral_stress = integrate.cumulative_trapezoid(stress, t, initial=0)               # scipyを使った応力の積分
 
 # scaling for figure
 e = strain/1.0     # 描画のためのスケーリング
@@ -72,7 +74,7 @@ fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(8, 7), sharex=True)
 
 # --- 上段：歪み (Input) ---
 ax1.set_xlim(start_time, end_time)
-ax1.set_ylim(-np.max(e)*0.5, np.max(e)*1.5) # 縦軸を固定
+ax1.set_ylim(-np.max(e)*0.5, np.max(e)*1.8) # 縦軸を固定
 ax1.set_ylabel('Applied Strain, $\epsilon$ /')
 ax1.set_title("Maxwell model: step strain")
 ax1.grid(True, ls='--')
