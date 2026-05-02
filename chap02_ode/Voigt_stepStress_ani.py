@@ -7,7 +7,7 @@ from matplotlib import patches
 import matplotlib.animation as animation
 
 '''
-テキストの式(1.22)をベースに組み立てる
+テキストの式(2.24)をベースに組み立てる
 '''
 
 # variables

@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
 '''
-テキストの式(1.22)をベースに組み立てる
+テキストの式(2.24)をベースに組み立てる
 '''
 
 # variables
@@ -31,7 +31,7 @@ except ValueError:
 def Voigt_stepStress(e, t, s, E, tau):
 # e: strain, s: stress, E: modulus, tau: retardation time
 # ここでは下でargsとしてs0=stress_iを入れてステップ応力を実現
-    dedt = (s/E - e)/tau      # (1.22)
+    dedt = (s/E - e)/tau      # (2.24)
     return dedt
 
 # 1. データ準備
