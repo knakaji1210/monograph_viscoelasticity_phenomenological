@@ -20,7 +20,7 @@ try:
 except ValueError:
     eta = 5*10**5               # [Pa s] viscosity
 
-tau = eta/E                     # [s] retardation time
+tau = eta/E                     # [s] relaxation time
 l = 0.1                         # [m] equilibrium length
 w = 0.5                         # ratio of dashpot width
 
@@ -32,7 +32,7 @@ except ValueError:
 
 # ODE解析で用いる関数の定義
 def Maxwell_stepStrain(s, t, tau):
-# e: strain, s: stress, tau: retardation time
+# e: strain, s: stress, tau: relaxation time
 # ステップ歪みe0=strain_iを加えるので、式(2.11)のde/dtの項が0となっている
     dsdt = -s/tau               # (2.12)
     return dsdt
