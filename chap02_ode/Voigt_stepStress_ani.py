@@ -4,17 +4,11 @@ import numpy as np
 from scipy.integrate import odeint
 import matplotlib.pyplot as plt
 from matplotlib import patches
-from matplotlib.animation import FuncAnimation
+import matplotlib.animation as animation
 
 '''
 テキストの式(1.22)をベースに組み立てる
 '''
-
-def Voigt_stepStress(e, t, s, E, tau):
-# e: strain, s: stress, E: modulus, tau: retardation time
-# ここでは下でargsとしてs=s0を入れてステップ応力を実現
-    dedt = (s/E - e)/tau      # (1.22)
-    return dedt
 
 # variables
 try:
@@ -25,38 +19,59 @@ try:
     eta = float(input('viscosity [kPa s] (default = 500.0 kPa s): '))*10**3
 except ValueError:
     eta = 5*10**5               # [Pa s] viscosity
+
 tau = eta/E                     # [s] retardation time
 l = 0.1                         # [m] equilibrium length
 w = 0.5                         # ratio of dashpot width
 
 # initial condition
 try:
-    s0 = float(input('step stress [MPa] (default = 0.05 MPa): '))*10**6
+    stress_i = float(input('step stress [MPa] (default = 0.05 MPa): '))*10**6
 except ValueError:
-    s0 = 0.05*10**6         # [Pa] step stress
-e0 = 0                      # [] initial strain
+    stress_i = 0.05*10**6         # [Pa] step stress
 
-tmax = 10                   # [s] duration time
-dt = 0.05                   # [s] interval time
-t_a = np.arange(0, tmax, dt)    # time after step stress
-t_b = np.arange(-2.0,0,dt) # time before step stress
-t = np.concatenate([t_b,t_a])   # whole time 
-zeros = np.zeros(len(t_b))
-ones = np.ones(len(t_a))
-s = np.concatenate([zeros,ones*s0])
+# ODE解析で用いる関数の定義
+def Voigt_stepStress(e, t, s, E, tau):
+# e: strain, s: stress, E: modulus, tau: retardation time
+# ここでは下でargsとしてs0=stress_iを入れてステップ応力を実現
+    dedt = (s/E - e)/tau      # (1.22)
+    return dedt
+
+# 1. データ準備
+start_time = -2.0   # 開始時間
+end_time = 8.0      # 終了時間
+event_time = 0.0    # ステップ歪みを加える時刻
+time_duration = end_time - start_time  # [s]
+time_duration_pre = event_time - start_time
+time_duration_post = end_time - event_time
+fps = 30
+steps = int(time_duration * fps) + 1
+interval_ms = 1000 / fps  # 1コマあたりのミリ秒
+t = np.linspace(start_time, end_time, steps)
+t_pre = t[t < event_time]
+t_post = t[t >= event_time]
+
+stress = np.where(t - event_time >= 0, stress_i, 0)
 
 # solution of ODE
-sol = odeint(Voigt_stepStress, e0, t_a, args=(s0,E,tau))
-e = np.concatenate([zeros,sol[:,0]])        # [] strain
-el = e*l                                    # [m] elongation
-dedt = np.array([0.0]+[(e[k+1]-e[k])/(t[k+1]-t[k]) for k in range(len(e)-1)])     # 簡易的なeの微分
-s_s = E*e                                   # stress on spring
-s_d = eta*dedt                              # stress on dashpot
+s0 = stress_i   # ODEの引数として入れるためにこの形で定義
+e0 = 0.0        # ステップ応力を加える前の歪みはゼロとするため、初期条件として定義
+sol = odeint(Voigt_stepStress, e0, t_post, args=(s0,E,tau))
+strain_pre = np.zeros_like(t_pre)  # ステップ前の歪みはゼロ
+strain_post = sol[:, 0]     # 歪み履歴
+strain = np.concatenate([strain_pre, strain_post])
+
+dt = t[1] - t[0]   # 時間刻み
+dedt = np.array([0.0]+[(strain[k+1]-strain[k])/(t[k+1]-t[k]) for k in range(len(strain)-1)])     # 簡易的なde/dt
 
 # scaling for figure
-s = s/10**6                     # MPaスケール
-s_s = s_s/10**6                 # MPaスケール
-s_d = s_d/10**6                 # MPaスケール
+e = strain/1.0          # 描画のためのスケーリング
+s = stress/10**6        # 描画のためのスケーリング ([MPa]単位に変換)
+s_s = E*e/10**6         # バネの応力 ([MPa]単位に変換)
+s_d = eta*dedt/10**6    # ダッシュポットの応力 ([MPa]単位に変換)
+# 並列なのでl0=lとなっている
+el = e*l                # [m] elongation
+
 
 fig = plt.figure(figsize=(8,5), tight_layout=True)
 ax = fig.add_subplot(111, xlabel='$t$ /s')
@@ -89,7 +104,7 @@ ax.plot([(0.08+1/4)*l,(0.08+1/4)*l],[w+1,-w+1], c='b')
 rect = patches.Rectangle(xy=((0.08+1/4)*l, -w+1), width=0.83*l, height=2*w, facecolor='y')
 ax.add_patch(rect)
 
-var_text = r'$\sigma_0$ = {0:.2f} MPa, $E$ = {1:.1f} MPa, $\eta$ = {2:.1f} kPa s'.format(s0/10**6,E/10**6,eta/10**3)
+var_text = r'$\sigma_0$ = {0:.2f} MPa, $E$ = {1:.1f} MPa, $\eta$ = {2:.1f} kPa s'.format(stress_i/10**6,E/10**6,eta/10**3)
 ax.text(0.5, 0.9, var_text, transform=ax.transAxes)
 eq_text = r'd$\epsilon$/d$t$ = ($\sigma_0$/$E$ - $\epsilon$)/$\tau$'
 ax.text(0.5, 0.8, eq_text, transform=ax.transAxes)
@@ -143,14 +158,12 @@ def update(i):              # ここのiは下のframes=np.arange(0, len(t))に�
     time_text.set_text(time_template % (t[i]))
     return bar, rod, point, rod_sp, triangle, rod_da, damper, time_text
 
-f = np.arange(0, len(t))
-frame_int = 1000 * dt       # [ms] interval between frames
-fps = 1000/frame_int        # frames per second
+# アニメーション実行   
+ani = animation.FuncAnimation(fig, update, frames=steps, 
+                    init_func=init, blit=True, interval=interval_ms, repeat=False)
 
-ani = FuncAnimation(fig, update, frames=f, 
-                    init_func=init, blit=True, interval=frame_int, repeat=False)
+savefile = './mp4/Voigt_stepStress_ani.mp4'
+ani.save(savefile, writer='ffmpeg', fps=fps, extra_args=['-r', '30'])
 
-savefile = "./gif/Voigt_stepStress.gif"
-ani.save(savefile, writer='pillow', fps=fps)
-
+plt.tight_layout()
 plt.show()
