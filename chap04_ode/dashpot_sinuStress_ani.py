@@ -4,18 +4,11 @@ import numpy as np
 from scipy.integrate import odeint
 import matplotlib.pyplot as plt
 from matplotlib import patches
-from matplotlib.animation import FuncAnimation
+import matplotlib.animation as animation
 
 '''
 テキストの式(1.5)をベースに組み立てる
 '''
-
-def dashpot_sinuStress(e, t, samp, af, eta):
-# e: strain, s: stress, eta: viscosity
-# ここではsampとafを指定し、この中でsの関数を作り振動応力を実現
-    s = samp*np.sin(af*t)
-    dedt = s/eta        # (1.5)
-    return dedt
 
 # variables
 try:
@@ -32,30 +25,51 @@ try:
 except ValueError:
     samp = 0.05*10**6
 try:
-    freq = float(input('frequency for sinusoidal stress [Hz] (default=1.0 Hz): '))
+    freq = float(input('frequency for sinusoidal stress [Hz] (default=0.5 Hz): '))
 except ValueError:
-    freq = 1.0
+    freq = 0.5
 
 af = 2*np.pi*freq
-e0 = 0
 
-tmax = 5/freq                   # [s] duration time
-dt = 1/(40*freq)                # [s] interval time
-t_a = np.arange(0, tmax, dt)    # time after step stress
-t_b = np.arange(-2.0,0,dt) # time before step stress
-t = np.concatenate([t_b,t_a])   # whole time 
-zeros = np.zeros(len(t_b))
-s_a = np.array([samp*np.sin(af*t) for t in t_a])
-s = np.concatenate([zeros,s_a]) # whole stress
+# ODE解析で用いる関数の定義
+def dashpot_sinuStress(e, t, samp, af, eta):
+# e: strain, s: stress, eta: viscosity
+# ここではsampとafを指定し、この中でsの関数を作り振動応力を実現
+    s = samp*np.sin(af*t)           # 振動応力の関数
+    dedt = s/eta                    # (1.5)
+    return dedt
+
+# 1. データ準備
+start_time = -2.0   # 開始時間
+end_time = 4/freq   # 終了時間
+event_time = 0.0    # 振動歪みを加える時刻
+time_duration = end_time - start_time  # [s]
+time_duration_pre = event_time - start_time
+time_duration_post = end_time - event_time
+fps = 60    # fps = 30だと足りないので60に変更 
+steps = int(time_duration * fps) + 1
+interval_ms = 1000 / fps  # 1コマあたりのミリ秒
+t = np.linspace(start_time, end_time, steps)
+t_pre = t[t < event_time]
+t_post = t[t >= event_time]
+
+stress_post = samp*np.sin(af*t)  # 振動応力の関数
+stress = np.where(t - event_time >= 0, stress_post, 0)
 
 # solution of ODE
-sol = odeint(dashpot_sinuStress, e0, t_a, args=(samp,af,eta))
-e = np.concatenate([zeros,sol[:,0]])            # [] strain
-el = e*l                                        # [m] elongation
+e0 = 0.0                              # 初期条件として定義
+sol = odeint(dashpot_sinuStress, e0, t_post, args=(samp,af,eta))
+strain_pre = np.zeros_like(t_pre)   # ステップ前の歪みはゼロ
+strain_post = sol[:, 0]             # 歪み履歴
+strain = np.concatenate([strain_pre, strain_post])
+                                       # [m] elongation
 
 # scaling for figure
-s = s/10**6                     # MPaスケール
+e = strain/1.0     # 描画のためのスケーリング
+s = stress/10**6   # 描画のためのスケーリング ([MPa]単位に変換)
+el = e*l           # [m] elongation
 
+# 2. グラフの初期設定
 fig = plt.figure(figsize=(8,5), tight_layout=True)
 ax = fig.add_subplot(111)
 ax.grid()
@@ -128,14 +142,11 @@ def update(i):              # ここのiは下のframes=np.arange(0, len(t))に�
     time_text.set_text(time_template % (t[i]))
     return rod, damper, point, stress, arrow_p, arrow_n, time_text
 
-f = np.arange(0, len(t))
-frame_int = 1000 * dt       # [ms] interval between frames
-fps = 1000/frame_int        # frames per second
+ani = animation.FuncAnimation(fig, update, frames=steps, 
+                    init_func=init, blit=True, interval=interval_ms, repeat=False)
 
-ani = FuncAnimation(fig, update, frames=f, 
-                    init_func=init, blit=True, interval=frame_int, repeat=False)
+savefile = './mp4/dashpot_sinuStress_ani_(f={0:.2f}Hz).mp4'.format(freq)
+ani.save(savefile, writer='ffmpeg', fps=fps, extra_args=['-r', '60'])
 
-savefile = "./gif/dashpot_sinuStress_ani_(f={0:.3f}Hz).gif".format(freq)
-ani.save(savefile, writer='pillow', fps=fps)
-
+plt.tight_layout()
 plt.show()
