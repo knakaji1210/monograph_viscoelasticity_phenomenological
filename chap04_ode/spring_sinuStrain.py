@@ -35,6 +35,10 @@ def spring_sinuStrain(s, t, eamp, af, E):
     dsdt = E*eamp*af*np.cos(af*t)   # ds/dt = E*de/dt = E*eamp*af*cos(af*t)
     return dsdt
 
+def getNearestIndex2value(list,value):
+    index = np.abs(np.array(list) -value).argsort()[0].tolist()
+    return index
+
 # データ準備
 start_time = -2.0   # 開始時間
 end_time = 4/freq   # 終了時間
@@ -59,9 +63,17 @@ stress_pre = np.zeros_like(t_pre)   # ステップ前の応力はゼロ
 stress_post = sol[:, 0]             # 応力履歴
 stress = np.concatenate([stress_pre, stress_post])
 
+# 位相差の計算
+strain_latter = strain[int(0.4*len(strain)):]     # 後半部分を抽出（前半は過渡応答を含むから）
+stress_latter = stress[int(0.4*len(stress)):]     # 後半部分を抽出（前半は過渡応答を含むから）
+stress_max = np.max(stress_latter)
+ind = getNearestIndex2value(stress_latter,0)      # 出力信号が0になるindexを抽出           
+phase_diff = (180/np.pi)*np.arcsin(np.abs(strain_latter[ind])/eamp)
+
 # 描画のためのスケーリング
 e = strain/1.0     # 描画のためのスケーリング
 s = stress/10**6   # 描画のためのスケーリング ([MPa]単位に変換)
+s_max = stress_max/10**6
 
 # グラフの初期設定
 fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(8, 7), sharex=True)
@@ -91,6 +103,10 @@ var_text = r'$\epsilon_{{amp}}$ = {0:.2f}, $f$ = {1:.3f} Hz, $E$ = {2:.1f} MPa'.
 ax1.text(0.1, 0.9, var_text, transform=ax1.transAxes)
 eq_text = r'$\sigma$ = $E\epsilon$'
 ax2.text(0.1, 0.9, eq_text, transform=ax2.transAxes)
+samp_text = r'$\sigma_{{amp}}$ = {0:.3f} MPa'.format(s_max)
+ax2.text(0.1, 0.35, samp_text, transform=ax2.transAxes)
+phase_diff_text = r'$\theta$ = {0:.1f} $\degree$'.format(phase_diff)
+ax2.text(0.1, 0.25, phase_diff_text, transform=ax2.transAxes)
 
 # アニメーション更新関数
 def animate(i):
