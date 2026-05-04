@@ -59,10 +59,12 @@ sol = odeint(spring_sinuStrain, s0, t_post, args=(eamp,af,E)) # ODEの解
 stress_pre = np.zeros_like(t_pre)   # ステップ前の応力はゼロ
 stress_post = sol[:, 0]             # 応力履歴
 stress = np.concatenate([stress_pre, stress_post])
+stress_max = np.max(stress)
 
 # 描画のためのスケーリング
 e = strain/1.0     # 描画のためのスケーリング
 s = stress/10**6   # 描画のためのスケーリング ([MPa]単位に変換)
+s_max = stress_max/10**6
 l = 0.1            # [m] 自然長
 w = 0.5            # 要素の長さと幅の比率
 el = e*l           # [m] 全体の伸び
@@ -82,17 +84,18 @@ ax.set_ylim(-5,5)
 y_0 = [0, 0]
 ax.plot([0, l/4],y_0, c='b')
 ax.plot(0,0, 'ro', markersize='10')
-ax.plot([0,l],[-2,-2], c='g')
-ax.plot([0,0],[-1.8,-2.2], c='g')
-ax.plot([l,l],[-1.8,-2.2], c='g')
+ax.plot([0,l],[-3,-3], c='g')
+ax.plot([0,0],[-2.8,-3.2], c='g')
+ax.plot([l,l],[-2.8,-3.2], c='g')
 
 # テキスト描画
 var_text = r'$\epsilon_{{amp}}$ = {0:.2f}, $f$ = {1:.3f} Hz, $E$ = {2:.1f} MPa'.format(eamp,freq,E/10**6)
 ax.text(0.4, 0.9, var_text, transform=ax.transAxes)
 eq_text = r'$\sigma$ = $E\epsilon$'
 ax.text(0.4, 0.8, eq_text, transform=ax.transAxes)
-ax.text(0.3, 0.25, '$l_0$', transform=ax.transAxes)
-ax.text(0.6, 0.38, '$\sigma$ (output)', transform=ax.transAxes)
+ax.text(0.3, 0.15, '$l_0$', transform=ax.transAxes)
+ax.text(0.6, 0.38, '$\epsilon$ (input)', transform=ax.transAxes)
+ax.text(0.6, 0.28, '$\sigma$ (output)', transform=ax.transAxes)
 
 # バネの描画
 rod, = ax.plot([],[], 'b', animated=True)
@@ -100,10 +103,15 @@ triangle, = ax.plot([],[], 'b', animated=True)
 point, = ax.plot([],[], 'ro', markersize='10', animated=True)
 # ここでは[],[]としているが、下で***.set_dataで実際の値を入れている
 
+# 歪みの描画
+strain_bar, = ax.plot([],[], 'b', lw=2, animated=True)
+arrow_e_p, = ax.plot([],[], 'b', marker=9, markersize='10', animated=True)
+arrow_e_n, = ax.plot([],[], 'b', marker=8, markersize='10', animated=True)
+
 # 応力の描画
-stress, = ax.plot([],[], 'r', lw=2, animated=True)
-arrow_p, = ax.plot([],[], 'r', marker=9, markersize='10', animated=True)
-arrow_n, = ax.plot([],[], 'r', marker=8, markersize='10', animated=True)
+stress_bar, = ax.plot([],[], 'r', lw=2, animated=True)
+arrow_s_p, = ax.plot([],[], 'r', marker=9, markersize='10', animated=True)
+arrow_s_n, = ax.plot([],[], 'r', marker=8, markersize='10', animated=True)
 
 time_template = '$t$ = %.1f s'
 time_text = ax.text(0.1, 0.9, '', transform=ax.transAxes)
@@ -112,24 +120,34 @@ time_text = ax.text(0.1, 0.9, '', transform=ax.transAxes)
 # アニメーション更新関数
 def init():               # FuncAnimationでinit_funcで呼び出す
     time_text.set_text('')
-    return rod, triangle, point, stress, arrow_p, arrow_n, time_text
+    return rod, triangle, point, strain_bar, arrow_e_p, arrow_e_n, stress_bar, arrow_s_p, arrow_s_n, time_text
 
 def update(i):              # ここのiは下のframes=np.arange(0, len(t))に対応した引数になっている
+    # 枠組み
     x_rod = [3*l/4 + el[i], l + el[i]]
     rod.set_data(x_rod,y_0)
+    # バネ
     x_tri = np.linspace(l/4, 3*l/4 + el[i],100)
     y_tri = w*((2/3)*np.arccos(np.cos(6*np.pi*(x_tri - l/4)/(el[i]+l/2)-np.pi/2+0.1))-1)
     triangle.set_data(x_tri,y_tri)
     point.set_data([l + el[i]],[0])
-    a = 0.2    # 見かけ上の振幅
-    x_stress = [l, l + a*s[i]/eamp]
-    stress.set_data(x_stress,[-1,-1])
-    if s[i] > 0:
-        arrow_p.set_data([l + a*s[i]/eamp],[-1])
+    # 歪み
+    x_strain = [l, l + el[i]]
+    strain_bar.set_data(x_strain,[-1,-1])
+    if el[i] > 0:
+        arrow_e_p.set_data([l + el[i]],[-1])
     else:
-        arrow_n.set_data([l + a*s[i]/eamp],[-1])
+        arrow_e_n.set_data([l + el[i]],[-1])
+    # 応力
+    a = 5.0    # 見かけ上の振幅補正
+    x_stress = [l, l + a*s_max*s[i]]
+    stress_bar.set_data(x_stress,[-2,-2])
+    if s[i] > 0:
+        arrow_s_p.set_data([l + a*s_max*s[i]],[-2])
+    else:
+        arrow_s_n.set_data([l + a*s_max*s[i]],[-2])
     time_text.set_text(time_template % (t[i]))
-    return rod, triangle, point, stress, arrow_p, arrow_n, time_text
+    return rod, triangle, point, strain_bar, arrow_e_p, arrow_e_n, stress_bar, arrow_s_p, arrow_s_n, time_text
 
 # アニメーション実行   
 ani = animation.FuncAnimation(fig, update, frames=steps, 

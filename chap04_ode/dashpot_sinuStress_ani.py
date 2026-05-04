@@ -92,16 +92,17 @@ ax.plot(x_d1,y_d2, c='b')
 ax.plot([0.08*l,0.08*l],[w,-w], c='b')
 rect = patches.Rectangle(xy=(0.08*l, -w), width=0.83*l, height=2*w, facecolor='y')
 ax.add_patch(rect)
-ax.plot([0,l],[-2,-2], c='g')
-ax.plot([0,0],[-1.8,-2.2], c='g')
-ax.plot([l,l],[-1.8,-2.2], c='g')
+ax.plot([0,l],[-3,-3], c='g')
+ax.plot([0,0],[-2.8,-3.2], c='g')
+ax.plot([l,l],[-2.8,-3.2], c='g')
 
 # テキスト描画
 var_text = r'$\sigma_{{amp}}$ = {0:.2f} MPa, $f$ = {1:.3f} Hz, $\eta$ = {2:.1f} kPa s'.format(samp/10**6,freq,eta/10**3)
 ax.text(0.4, 0.9, var_text, transform=ax.transAxes)
 eq_text = r'd$\epsilon$/d$t$ = $\sigma$/$\eta$'
 ax.text(0.4, 0.8, eq_text, transform=ax.transAxes)
-ax.text(0.3, 0.25, '$l_0$', transform=ax.transAxes)
+ax.text(0.3, 0.15, '$l_0$', transform=ax.transAxes)
+ax.text(0.6, 0.28, '$\epsilon$ (output)', transform=ax.transAxes)
 ax.text(0.6, 0.38, '$\sigma$ (input)', transform=ax.transAxes)
 
 # ダッシュポットの描画
@@ -111,9 +112,14 @@ point, = ax.plot([], [], 'ro', markersize='10', animated=True)
 # ここでは[],[]としているが、下で***.set_dataで実際の値を入れている
 
 # 応力の描画
-stress, = ax.plot([],[], 'r', lw=2, animated=True)
-arrow_p, = ax.plot([],[], 'r', marker=9, markersize='10', animated=True)
-arrow_n, = ax.plot([],[], 'r', marker=8, markersize='10', animated=True)
+stress_bar, = ax.plot([],[], 'r', lw=2, animated=True)
+arrow_s_p, = ax.plot([],[], 'r', marker=9, markersize='10', animated=True)
+arrow_s_n, = ax.plot([],[], 'r', marker=8, markersize='10', animated=True)
+
+# 歪みの描画
+strain_bar, = ax.plot([],[], 'b', lw=2, animated=True)
+arrow_e_p, = ax.plot([],[], 'b', marker=9, markersize='10', animated=True)
+arrow_e_n, = ax.plot([],[], 'b', marker=8, markersize='10', animated=True)
 
 time_template = '$t$ = %.1f s'
 time_text = ax.text(0.1, 0.9, '', transform=ax.transAxes)
@@ -122,10 +128,12 @@ time_text = ax.text(0.1, 0.9, '', transform=ax.transAxes)
 # アニメーション更新関数
 def init():               # FuncAnimationでinit_funcで呼び出す
     time_text.set_text('')
-    return rod, damper, point, stress, arrow_p, arrow_n, time_text
+    return rod, damper, point, stress_bar, arrow_s_p, arrow_s_n, strain_bar, arrow_e_p, arrow_e_n, time_text
 
 def update(i):              # ここのiは下のframes=np.arange(0, len(t))に対応した引数になっている
+    # 枠組み
     x_rod = [l/2 + el[i], l + el[i]]
+    # ダッシュポット
     x_damp = (l/2)+el[i]
     y_damp = 0.7*w
     x_damper = [x_damp, x_damp]
@@ -133,15 +141,23 @@ def update(i):              # ここのiは下のframes=np.arange(0, len(t))に�
     rod.set_data(x_rod,y_0)
     damper.set_data(x_damper,y_damper)
     point.set_data([l + el[i]],[0])
-    a = 0.5    # 見かけ上の振幅
+    # 応力
+    a = 0.5    # 見かけ上の振幅補正
     x_stress = [l, l + a*s[i]]
-    stress.set_data(x_stress,[-1,-1])
+    stress_bar.set_data(x_stress,[-1,-1])
     if s[i] > 0:
-        arrow_p.set_data([l + a*s[i]],[-1])
+        arrow_s_p.set_data([l + a*s[i]],[-1])
     else:
-        arrow_n.set_data([l + a*s[i]],[-1])
+        arrow_s_n.set_data([l + a*s[i]],[-1])
+    # 歪み
+    x_strain = [l, l + el[i]]
+    strain_bar.set_data(x_strain,[-2,-2])
+    if el[i] > 0:
+        arrow_e_p.set_data([l + el[i]],[-2])
+    else:
+        arrow_e_n.set_data([l + el[i]],[-2])
     time_text.set_text(time_template % (t[i]))
-    return rod, damper, point, stress, arrow_p, arrow_n, time_text
+    return rod, damper, point, stress_bar, arrow_s_p, arrow_s_n, strain_bar, arrow_e_p, arrow_e_n, time_text
 
 # アニメーション実行  
 ani = animation.FuncAnimation(fig, update, frames=steps, 
