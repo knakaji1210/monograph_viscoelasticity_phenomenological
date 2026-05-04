@@ -35,6 +35,10 @@ def dashpot_sinuStress(e, t, samp, af, eta):
     dedt = s/eta                    # (1.5)
     return dedt
 
+def getNearestIndex2value(list,value):
+    index = np.abs(np.array(list) -value).argsort()[0].tolist()
+    return index
+
 # データ準備
 start_time = -2.0   # 開始時間
 end_time = 4/freq   # 終了時間
@@ -59,8 +63,16 @@ strain_pre = np.zeros_like(t_pre)   # ステップ前の歪みはゼロ
 strain_post = sol[:, 0]             # 歪み履歴
 strain = np.concatenate([strain_pre, strain_post])
 
+# 位相差の計算
+strain_latter = strain[int(0.4*len(strain)):]     # 後半部分を抽出（前半は過渡応答を含むから）
+stress_latter = stress[int(0.4*len(stress)):]     # 後半部分を抽出（前半は過渡応答を含むから）
+strain_max = np.max(strain_latter)
+ind = getNearestIndex2value(strain_latter,strain_max/2)      # 出力信号が振幅の1/2になるindexを抽出           
+phase_diff = (180/np.pi)*np.arcsin(np.abs(stress_latter[ind])/samp)
+
 # 描画のためのスケーリング
 e = strain/1.0     # 描画のためのスケーリング
+e_max = strain_max/1.0
 s = stress/10**6   # 描画のためのスケーリング ([MPa]単位に変換)
 
 # グラフの初期設定
@@ -91,6 +103,10 @@ var_text = r'$\sigma_{{amp}}$ = {0:.2f} MPa, $f$ = {1:.1f} Hz, $\eta$ = {2:.1f} 
 ax1.text(0.1, 0.9, var_text, transform=ax1.transAxes)
 eq_text = r'd$\epsilon$/d$t$ = $\sigma$/$\eta$'
 ax2.text(0.1, 0.9, eq_text, transform=ax2.transAxes)
+eamp_text = r'$\epsilon_{{amp}}$ = {0:.3f}'.format(e_max/2) # 0~e_maxで振動するので振幅はその1/2
+ax2.text(0.1, 0.35, eamp_text, transform=ax2.transAxes)
+phase_diff_text = r'$\theta$ = {0:.1f} $\degree$'.format(phase_diff)
+ax2.text(0.1, 0.25, phase_diff_text, transform=ax2.transAxes)
 
 # アニメーション更新関数
 def animate(i):
