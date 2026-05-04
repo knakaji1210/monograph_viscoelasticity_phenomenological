@@ -1,4 +1,4 @@
-# ordinary differential equation of dashpot (step stress) with animation
+# ダッシュポット要素の常微分方程式（ステップ応力）（アニメーション付き）
 
 import numpy as np
 from scipy.integrate import odeint
@@ -57,7 +57,7 @@ strain = np.concatenate([strain_pre, strain_post])
 e = strain/1.0     # 描画のためのスケーリング
 s = stress/10**6   # 描画のためのスケーリング ([MPa]単位に変換)
 l = 0.1            # [m] 自然長
-w = 0.5            # バネの長さと幅の比率
+w = 0.5            # 要素の長さと幅の比率
 el = e*l           # [m] 全体の伸び
 
 # グラフの初期設定
@@ -89,6 +89,7 @@ ax.plot([0,l],[-2,-2], c='g')
 ax.plot([0,0],[-1.8,-2.2], c='g')
 ax.plot([l,l],[-1.8,-2.2], c='g')
 
+# テキスト描画
 var_text = r'$\sigma_0$ = {0:.2f} MPa, $\eta$ = {1:.1f} kPa s'.format(s0/10**6,eta/10**3)
 ax.text(0.5, 0.9, var_text, transform=ax.transAxes)
 eq_text = r'd$\epsilon$/d$t$ = $\sigma_0$/$\eta$'
@@ -105,11 +106,11 @@ time_template = '$t$ = %.1f s'
 time_text = ax.text(0.1, 0.9, '', transform=ax.transAxes)
 # ここでは''としているが、下で time_text.set_textで実際のテキストを入れている
 
+# アニメーション更新関数
 def init():               # FuncAnimationでinit_funcで呼び出す
     time_text.set_text('')
     return rod, damper, point, time_text
 
-# アニメーション更新関数
 def update(i):              # ここのiは下のframes=np.arange(0, len(t))に対応した引数になっている
     x_rod = [l/2 + el[i], l + el[i]]
     x_damp = l/2+el[i]

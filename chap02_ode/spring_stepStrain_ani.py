@@ -1,4 +1,4 @@
-# ordinary differential equation of spring (step strain) with animation
+# バネ要素の常微分方程式（ステップ歪み）（アニメーション付き）
 
 import numpy as np
 from scipy.integrate import odeint
@@ -14,7 +14,7 @@ import matplotlib.animation as animation
 try:
     E = float(input('modulus [MPa] (default = 0.2 MPa): '))*10**6
 except ValueError:
-    E = 2*10**5             # [Pa] modulus
+    E = 2*10**5             # [Pa] 弾性率
 
 # 初期条件の設定
 try:
@@ -24,7 +24,7 @@ except ValueError:
 
 # ODE解析で用いる関数の定義
 def spring_stepStrain(s, t, e, E):
-# e: strain, s: stress, E: modulus
+# e: 歪み, s: 応力, E: 弾性率
 # ここでは下でargsとしてe0=strain_iを入れてステップ歪みを実現
     dsdt = 0    # バネ要素単独では応力は時間変化しないため
     return dsdt
@@ -57,7 +57,7 @@ stress = np.concatenate([stress_pre, stress_post])
 e = strain/1.0     # 描画のためのスケーリング
 s = stress/10**6   # 描画のためのスケーリング ([MPa]単位に変換)
 l = 0.1            # [m] 自然長
-w = 0.5            # バネの長さと幅の比率
+w = 0.5            # 要素の長さと幅の比率
 el = e*l           # [m] 全体の伸び
 
 # グラフの初期設定
@@ -79,6 +79,7 @@ ax.plot([0,l],[-2,-2], c='g')
 ax.plot([0,0],[-1.8,-2.2], c='g')
 ax.plot([l,l],[-1.8,-2.2], c='g')
 
+# テキスト描画
 var_text = r'$\epsilon_0$ = {0:.2f} MPa, $E$ = {1:.1f} MPa'.format(strain_i,E/10**6)
 ax.text(0.5, 0.9, var_text, transform=ax.transAxes)
 eq_text = r'$\sigma = E\epsilon_0$'
@@ -95,11 +96,11 @@ time_template = '$t$ = %.1f s'
 time_text = ax.text(0.1, 0.9, '', transform=ax.transAxes)
 # ここでは''としているが、下で time_text.set_textで実際のテキストを入れている
 
+# アニメーション更新関数
 def init():
     time_text.set_text('')
     return rod, triangle, point, time_text
 
-# アニメーション更新関数
 def update(i):          
     x_rod = [3*l/4 + el[i], l + el[i]]
     rod.set_data(x_rod,y_0)
