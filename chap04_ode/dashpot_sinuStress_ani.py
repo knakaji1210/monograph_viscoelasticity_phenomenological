@@ -116,7 +116,7 @@ ax.text(0.4, 0.8, eq_text, transform=ax.transAxes)
 ax.text(0.3, 0.15, '$l_0$', transform=ax.transAxes)
 ax.text(0.6, 0.28, '$\epsilon$ (output)', transform=ax.transAxes)
 ax.text(0.6, 0.38, '$\sigma$ (input)', transform=ax.transAxes)
-eamp_text = r'$\epsilon_{{amp}}$ = {0:.3f}'.format(e_max)
+eamp_text = r'$\epsilon_{{amp}}$ = {0:.3f}'.format(e_max/2) # 0~e_maxで振動するので振幅はその1/2
 ax.text(0.75, 0.52, eamp_text, transform=ax.transAxes)
 phase_diff_text = r'$\theta$ = {0:.1f} $\degree$'.format(phase_diff)
 ax.text(0.75, 0.45, phase_diff_text, transform=ax.transAxes)
