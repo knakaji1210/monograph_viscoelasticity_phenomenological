@@ -8,14 +8,14 @@ import matplotlib.animation as animation
 def relaxation_modulus(t_elapsed, E_inf, E_i, tau):
     return np.where(t_elapsed >= 0, E_inf + (E_i - E_inf) * np.exp(-t_elapsed/tau), 0)
 
-# 1. データ準備
-strain_i = 1.0  # ステップ歪みの大きさ
-start_time = -2.0  # 開始時間
-end_time = 8.0    # 終了時間
-time_duration = end_time - start_time  # [s]
-fps = 30
-steps = int(time_duration * fps) + 1
-interval_ms = 1000 / fps  # 1コマあたりのミリ秒
+# データ準備
+strain_i = 1.0      # ステップ歪みの大きさ
+start_time = -2.0   # [s] 開始時間
+end_time = 8.0      # [s] 終了時間
+time_duration = end_time - start_time   # [s]　継続時間
+fps = 30            # 1秒あたりのフレーム数 
+steps = int(time_duration * fps) + 1    # 総フレーム数
+interval_ms = 1000 / fps                # 1コマあたりのミリ秒
 t = np.linspace(start_time, end_time, steps)
 t0 = 0.0        # ステップ歪みを加える時刻
 E_inf = 1.0     # 平衡弾性率
@@ -24,7 +24,7 @@ tau = 2.5       # 緩和時間
 stress1 = strain_i * relaxation_modulus(t - t0, E_inf, E_i, tau)
 stress2 = strain_i * relaxation_modulus(t - t0, E_inf, E_inf, tau)
 
-# 2. グラフの初期設定
+# グラフの初期設定
 fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(8, 7), sharex=True)
 
 # --- 上段：歪み (Input) ---
@@ -48,7 +48,7 @@ line_stress1, = ax2.plot([], [], color='red', lw=2, label='Response to step stra
 line_stress2, = ax2.plot([], [], '--', color='green', lw=2, label='Response to step strain ($E_\\infty$ only)')
 ax2.legend(loc='upper right')
 
-# 3. アニメーション更新関数
+# アニメーション更新関数
 def animate(i):
     curr_t = t[:i]
     # 歪みデータの更新

@@ -8,14 +8,14 @@ import matplotlib.animation as animation
 def creep_compliance(t_elapsed, J0, J_inf, eta, tau):
     return np.where(t_elapsed >= 0, J0 + eta * t_elapsed + (J_inf - J0) * (1 - np.exp(-t_elapsed/tau)), 0)
 
-# 1. データ準備
-stress_i = 1.0  # ステップ応力の大きさ
-start_time = -2.0  # 開始時間
-end_time = 8.0    # 終了時間
-time_duration = end_time - start_time  # [s]
-fps = 30
-steps = int(time_duration * fps) + 1
-interval_ms = 1000 / fps  # 1コマあたりのミリ秒
+# データ準備
+stress_i = 1.0      # ステップ応力の大きさ
+start_time = -2.0   # [s] 開始時間
+end_time = 8.0      # [s] 終了時間
+time_duration = end_time - start_time   # [s] 継続時間
+fps = 30            # 1秒あたりのフレーム数
+steps = int(time_duration * fps) + 1    # 総フレーム数
+interval_ms = 1000 / fps                # 1コマあたりのミリ秒
 t = np.linspace(start_time, end_time, steps)
 t0 = 0.0    # 荷重（応力）を加える時刻
 J0 = 2.0    # 瞬間コンプライアンス
@@ -28,7 +28,7 @@ strain1 = stress_i * creep_compliance(t - t0, J0, J_inf, eta, tau)
 strain2 = stress_i * creep_compliance(t - t0, J0, J_inf, 0, tau)    # 粘性流動項なしの応答
 strain3 = stress_i * creep_compliance(t - t0, J0, J0, eta, tau)     # 緩和項なしの応答 (粘性流動のみ)
 
-# 2. グラフの初期設定
+# グラフの初期設定
 fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(8, 7), sharex=True)
 
 # --- 上段：応力 (Input) ---
@@ -52,7 +52,7 @@ line_stress2, = ax2.plot([], [], 'g--', lw=2, label='creep response (no viscous 
 line_stress3, = ax2.plot([], [], 'b--', lw=2, label='creep response (no relaxation term)')
 ax2.legend(loc='upper left')
 
-# 3. アニメーション更新関数
+# アニメーション更新関数
 def animate(i):
     curr_t = t[:i]
     # 応力履歴の更新
