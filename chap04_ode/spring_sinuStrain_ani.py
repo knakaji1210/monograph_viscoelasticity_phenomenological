@@ -36,6 +36,10 @@ def spring_sinuStrain(s, t, eamp, af, E):
     dsdt = E*eamp*af*np.cos(af*t)   # ds/dt = E*de/dt = E*eamp*af*cos(af*t)
     return dsdt
 
+def getNearestIndex2value(list,value):
+    index = np.abs(np.array(list) -value).argsort()[0].tolist()
+    return index
+
 # データ準備
 start_time = -2.0   # 開始時間
 end_time = 4/freq   # 終了時間
@@ -59,7 +63,13 @@ sol = odeint(spring_sinuStrain, s0, t_post, args=(eamp,af,E)) # ODEの解
 stress_pre = np.zeros_like(t_pre)   # ステップ前の応力はゼロ
 stress_post = sol[:, 0]             # 応力履歴
 stress = np.concatenate([stress_pre, stress_post])
-stress_max = np.max(stress)
+
+# 位相差の計算
+strain_latter = strain[int(0.4*len(strain)):]     # 後半部分を抽出（前半は過渡応答を含むから）
+stress_latter = stress[int(0.4*len(stress)):]     # 後半部分を抽出（前半は過渡応答を含むから）
+stress_max = np.max(stress_latter)
+ind = getNearestIndex2value(stress_latter,0)      # 出力信号が0になるindexを抽出           
+phase_diff = (180/np.pi)*np.arcsin(np.abs(strain_latter[ind])/eamp)
 
 # 描画のためのスケーリング
 e = strain/1.0     # 描画のためのスケーリング
@@ -96,6 +106,10 @@ ax.text(0.4, 0.8, eq_text, transform=ax.transAxes)
 ax.text(0.3, 0.15, '$l_0$', transform=ax.transAxes)
 ax.text(0.6, 0.38, '$\epsilon$ (input)', transform=ax.transAxes)
 ax.text(0.6, 0.28, '$\sigma$ (output)', transform=ax.transAxes)
+samp_text = r'$\sigma_{{amp}}$ = {0:.3f} MPa'.format(s_max)
+ax.text(0.75, 0.52, samp_text, transform=ax.transAxes)
+phase_diff_text = r'$\theta$ = {0:.1f} $\degree$'.format(phase_diff)
+ax.text(0.75, 0.45, phase_diff_text, transform=ax.transAxes)
 
 # バネの描画
 rod, = ax.plot([],[], 'b', animated=True)
@@ -139,13 +153,13 @@ def update(i):              # ここのiは下のframes=np.arange(0, len(t))に�
     else:
         arrow_e_n.set_data([l + el[i]],[-1])
     # 応力
-    a = 5.0    # 見かけ上の振幅補正
-    x_stress = [l, l + a*s_max*s[i]]
+    a = 0.5    # 見かけ上の振幅補正
+    x_stress = [l, l + a*s[i]]
     stress_bar.set_data(x_stress,[-2,-2])
     if s[i] > 0:
-        arrow_s_p.set_data([l + a*s_max*s[i]],[-2])
+        arrow_s_p.set_data([l + a*s[i]],[-2])
     else:
-        arrow_s_n.set_data([l + a*s_max*s[i]],[-2])
+        arrow_s_n.set_data([l + a*s[i]],[-2])
     time_text.set_text(time_template % (t[i]))
     return rod, triangle, point, strain_bar, arrow_e_p, arrow_e_n, stress_bar, arrow_s_p, arrow_s_n, time_text
 
