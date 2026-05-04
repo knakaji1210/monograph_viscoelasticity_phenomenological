@@ -1,4 +1,4 @@
-# ordinary differential equation of dashpot (step stress)
+# ダッシュポット要素の常微分方程式（ステップ応力）
 
 import numpy as np
 from scipy.integrate import odeint
@@ -52,7 +52,7 @@ strain_pre = np.zeros_like(t_pre)   # ステップ前の歪みはゼロ
 strain_post = sol[:, 0]             # 歪み履歴
 strain = np.concatenate([strain_pre, strain_post])
 
-# scaling for figure
+# 描画のためのスケーリング
 e = strain/1.0     # 描画のためのスケーリング
 s = stress/10**6   # 描画のためのスケーリング ([MPa]単位に変換)
 
@@ -79,6 +79,7 @@ ax2.grid(True, ls='--')
 line_strain, = ax2.plot([], [], color='blue', lw=2, label='Response to step stress')
 ax2.legend(loc='upper right')
 
+# テキスト描画
 var_text = r'$\sigma_0$ = {0:.2f} MPa, $\eta$ = {1:.1f} kPa s'.format(stress_i/10**6,eta/10**3)
 ax1.text(0.1, 0.9, var_text, transform=ax1.transAxes)
 eq_text = r'd$\epsilon$/d$t$ = $\sigma_0$/$\eta$'

@@ -1,4 +1,4 @@
-# ordinary differential equation of spring (step strain)
+# バネ要素の常微分方程式（ステップ歪み）
 
 import numpy as np
 from scipy.integrate import odeint
@@ -79,6 +79,7 @@ ax2.grid(True, ls='--')
 line_stress, = ax2.plot([], [], color='red', lw=2, label='Response to step strain')
 ax2.legend(loc='upper right')
 
+# テキスト描画
 var_text = r'$\epsilon_0$ = {0:.2f}, $E$ = {1:.1f} MPa'.format(strain_i, E/10**6)
 ax1.text(0.1, 0.9, var_text, transform=ax1.transAxes)
 eq_text = r'$\sigma = E\epsilon_0$'

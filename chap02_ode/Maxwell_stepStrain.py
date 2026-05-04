@@ -1,4 +1,4 @@
-# ordinary differential equation of Maxwell model (step strain)
+# マクスウェルモデルの常微分方程式（ステップ歪み）
 
 import numpy as np
 from scipy.integrate import odeint
@@ -10,66 +10,66 @@ import matplotlib.animation as animation
 テキストの式(2.12)をベースに組み立てる
 '''
 
-# variables
+# 変数の設定
 try:
     E = float(input('modulus [MPa] (default = 0.2 MPa): '))*10**6
 except ValueError:
-    E = 2*10**5                 # [Pa] modulus
+    E = 2*10**5                 # [Pa] 弾性率
 try:
     eta = float(input('viscosity [kPa s] (default = 500.0 kPa s): '))*10**3
 except ValueError:
-    eta = 5*10**5               # [Pa s] viscosity
+    eta = 5*10**5               # [Pa s] 粘度
 
-tau = eta/E                     # [s] relaxation time
+tau = eta/E                     # [s] 緩和時間
 
-# initial condition
+# 初期条件の設定
 try:
     strain_i = float(input('step strain [] (default = 0.2): '))
 except ValueError:
-    strain_i = 0.2               # [] step strain
+    strain_i = 0.2               # [] ステップ歪み
 
 # ODE解析で用いる関数の定義
 def Maxwell_stepStrain(s, t, tau):
-# e: strain, s: stress, tau: relaxation time
+# e: 歪み, s: 応力, tau: 緩和時間
 # ステップ歪みe0=strain_iを加えるので、式(2.11)のde/dtの項が0となっている
     dsdt = -s/tau               # (2.12)
     return dsdt
 
-# 1. データ準備
+# データ準備
 start_time = -2.0   # 開始時間
 end_time = 8.0      # 終了時間
 event_time = 0.0    # ステップ歪みを加える時刻
-time_duration = end_time - start_time  # [s]
-time_duration_pre = event_time - start_time
-time_duration_post = end_time - event_time
-fps = 30
-steps = int(time_duration * fps) + 1
-interval_ms = 1000 / fps  # 1コマあたりのミリ秒
+time_duration = end_time - start_time       # [s] 継続時間
+time_duration_pre = event_time - start_time # [s] ステップ前の継続時間
+time_duration_post = end_time - event_time  # [s] ステップ後の継続時間
+fps = 30            # 1秒あたりのフレーム数
+steps = int(time_duration * fps) + 1        # 総フレーム数
+interval_ms = 1000 / fps                    # 1コマあたりのミリ秒
 t = np.linspace(start_time, end_time, steps)
 t_pre = t[t < event_time]
 t_post = t[t >= event_time]
 
 strain = np.where(t - event_time >= 0, strain_i, 0)
 
-# solution of ODE
+# ODEの解析
 e0 = strain_i       # ODEの引数として入れるためにこの形で定義
 s0 = E * strain_i   # バネ要素の応力はステップ歪みに対して即座に応答するため、初期条件として定義
-sol = odeint(Maxwell_stepStrain, s0, t_post, args=(tau,))
-stress_pre = np.zeros_like(t_pre)  # ステップ前の応力はゼロ
-stress_post = sol[:, 0]  # 応力履歴
+sol = odeint(Maxwell_stepStrain, s0, t_post, args=(tau,)) # ODEの解
+stress_pre = np.zeros_like(t_pre)   # ステップ前の応力はゼロ
+stress_post = sol[:, 0]             # 応力履歴
 stress = np.concatenate([stress_pre, stress_post])
 
 #dt = t[1] - t[0]   # 時間刻み
 #integral_stress = np.array([stress[:k+1].sum()*dt for k in range(len(stress))])     # 簡易的な応力の積分
 integral_stress = integrate.cumulative_trapezoid(stress, t, initial=0)               # scipyを使った応力の積分
 
-# scaling for figure
+# 描画のためのスケーリング
 e = strain/1.0     # 描画のためのスケーリング
 s = stress/10**6   # 描画のためのスケーリング ([MPa]単位に変換)
 e_s = s/(E/10**6)  # バネの歪み
 e_d = integral_stress/eta   # ダッシュポットの歪み
 
-# 2. グラフの初期設定
+# グラフの初期設定
 fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(8, 7), sharex=True)
 
 # --- 上段：歪み (Input) ---
@@ -94,6 +94,7 @@ ax2.grid(True, ls='--')
 line_stress, = ax2.plot([], [], color='red', lw=2, label='Response to step strain')
 ax2.legend(loc='upper right')
 
+# テキスト描画
 var_text = r'$\epsilon_0$ = {0:.1f}, $E$ = {1:.1f} MPa, $\eta$ = {2:.1f} kPa s'.format(e0,E/10**6,eta/10**3)
 ax1.text(0.1, 0.9, var_text, transform=ax1.transAxes)
 eq_text = r'd$\sigma$/d$t$ = -$\sigma$/$\tau$'
@@ -101,7 +102,7 @@ ax2.text(0.1, 0.9, eq_text, transform=ax2.transAxes)
 res_text = r'$\tau$ = {0:.1f} s'.format(tau)
 ax2.text(0.1, 0.8, res_text, transform=ax2.transAxes)
 
-# 3. アニメーション更新関数
+# アニメーション更新関数
 def animate(i):
     # 歪みデータの更新
     line_strain.set_data(t[:i], e[:i])
