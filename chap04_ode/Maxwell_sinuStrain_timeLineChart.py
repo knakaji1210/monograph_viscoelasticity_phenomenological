@@ -132,7 +132,7 @@ s = stress/10**6   # 描画のためのスケーリング ([MPa]単位に変換)
 samp_ani = samp_ani/10**6
 samp_max = np.max(samp_list)/10**6
 e_s = s/(E/10**6)   # バネの歪み
-e_d = i_stress/eta   # ダッシュポットの歪み（本来はこちらが正しい）
+e_d = i_stress/eta   # ダッシュポットの歪み
 #e_d = e - e_s      # 簡単にはこちらでも良い    
 
 # グラフの初期設定
