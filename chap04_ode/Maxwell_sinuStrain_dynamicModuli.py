@@ -1,10 +1,28 @@
 # マクスウェルモデルの常微分方程式（振動歪み）
-# 周波数応答（振幅と位相）
+# 周波数応答（動的弾性率）
 
+'''
+How to use
+% python3 Maxwell_sinuStrain_dynamicModuli.py args[1]
+args: -log
+"-log"をつけると縦軸をログスケールに変換
+何もついていないか、間違えたものがついている時はリニアスケールで表示
+'''
+
+import sys
 import numpy as np
 from scipy.integrate import odeint
 from scipy import integrate
 import matplotlib.pyplot as plt
+
+if len(sys.argv) == 1:
+    axisoption = ""
+else:
+    axisoption = sys.argv[1]
+if axisoption == "-log":
+    pass
+else:
+    axisoption = ""
 
 '''
 テキストの式(2.11)をベースに組み立てる
@@ -60,8 +78,7 @@ def getNearestIndex2value(list,value):
 t_start_pre = -2.0          # [s] 開始時間
 t_event = 0.0               # [s] 振動歪みを加える時刻
 t_duration_pre = t_event - t_start_pre          # [s] ステップ前の継続時間
-fps = 1000                   # 1秒あたりのフレーム数
-# ここではフレーム数としては意味がないが、stepsを決めるために使っている。細かくデータを取るために1000を代入している
+fps = 60                    # 1秒あたりのフレーム数、30だと足りないので60に変更
 interval_ms = 1000 / fps    # 1コマあたりのミリ秒
 steps_pre = int(t_duration_pre * fps) + 1       # 総フレーム数
 t_pre = np.linspace(t_start_pre, t_event, steps_pre)
@@ -77,7 +94,8 @@ t_start = t_pre[-1]
 t_start_pre = -2.0          # [s] 開始時間
 t_event = 0.0               # [s] 振動歪みを加える時刻
 t_duration_pre = t_event - t_start_pre          # [s] ステップ前の継続時間
-fps = 60                    # 1秒あたりのフレーム数、30だと足りないので60に変更
+fps = 1000                   # 1秒あたりのフレーム数
+# ここではフレーム数としては意味がないが、stepsを決めるために使っている。細かくデータを取るために1000を代入している
 interval_ms = 1000 / fps    # 1コマあたりのミリ秒
 steps_pre = int(t_duration_pre * fps) + 1       # 総フレーム数
 t_pre = np.linspace(t_start_pre, t_event, steps_pre)
@@ -140,36 +158,66 @@ samp_array = np.array(samp_list)/10**6
 samp_max = np.max(samp_array)
 pdiff_array = np.array(pdiff_list)
 
+# E', E"の計算
+'''
+E' = samp*cos(theta)/eamp
+E" = samp*sin(theta)/eamp
+'''
+
+cos_pdiff = np.cos(np.radians(pdiff_array))
+sin_pdiff = np.sin(np.radians(pdiff_array))
+strMod = samp_array * cos_pdiff / eamp
+losMod = samp_array * sin_pdiff / eamp
+
+if axisoption == "-log":
+    strMod = strMod * 10**6
+    losMod = losMod * 10**6
+else:
+    strMod = strMod
+    losMod = losMod
+
 fig = plt.figure(figsize=(8,5), tight_layout=True)
 ax1 = fig.add_subplot(111)
-#ax1.grid()
+ax1.grid()
+ax2 = ax1.twinx()
+ax2.grid(ls='dotted')
 title_text = "Maxwell model: sinusoidal strain (frequecy sweep)"
 ax1.set_title(title_text)
 ax1.set_axisbelow(True)
+ax1.set_xscale('log')
 ax1.set_xlabel(r'$\omega\tau$')
-ax1.set_ylim(-0.1*samp_max,1.2*samp_max)
-ax1.set_ylabel(r'$\sigma_{{amp}}$ /MPa')
-ax2 = ax1.twinx()
-ax2.grid(ls='dotted')
-ax2.set_ylim(-10,100)
-ax2.set_ylabel(r'$\theta$ /$\degree$')
+if axisoption == "-log":
+    ax1.set_ylim(10**2, 10**7)
+    ax1.set_ylabel(r'storage modulus, $E^{{\prime}}$ /Pa')
+    ax2.set_ylim(10**2, 10**7)
+    ax2.set_ylabel(r'loss modulus, $E^{{\prime\prime}}$ /Pa')
+    ax1.set_yscale('log')
+    ax2.set_yscale('log')
+else:
+    ax1.set_ylim(-0.05*np.max(strMod), 1.2*np.max(strMod))
+    ax1.set_ylabel(r'storage modulus, $E^{{\prime}}$ /MPa')
+    ax2.set_ylim(-0.05*np.max(strMod), 1.2*np.max(strMod))
+    ax2.set_ylabel(r'loss modulus, $E^{{\prime\prime}}$ /MPa')
 
 var_text = r'$\epsilon_{{amp}}$ = {0:.2f}, $E$ = {1:.1f} MPa, $\eta$ = {2:.1f} kPa s'.format(eamp,E/10**6,eta/10**3)
-ax1.text(0.05, 0.5, var_text, transform=ax1.transAxes)
+ax1.text(0.05, 0.8, var_text, transform=ax1.transAxes)
 eq_text = r'd$\sigma$/d$t$ = -$\sigma$/$\tau$ + $E$d$\epsilon$/d$t$'
-ax1.text(0.05, 0.4, eq_text, transform=ax1.transAxes)
+ax1.text(0.05, 0.7, eq_text, transform=ax1.transAxes)
 res_text = r'$\tau$ = {0:.2f} s'.format(tau)
-ax1.text(0.05, 0.3, res_text, transform=ax1.transAxes)
+ax1.text(0.05, 0.6, res_text, transform=ax1.transAxes)
 
-ax1.plot(aft_array,samp_array, 'ro-', label=r'$\sigma_{{amp}}$')
-ax1.set_xscale('log')
-ax2.plot(aft_array,pdiff_array, 'bo-', label=r'$\theta$')
+ax1.plot(aft_array,strMod, 'ro-', label=r'$E^{{\prime}}$')
+ax2.plot(aft_array,losMod, 'bo-', label=r'$E^{{\prime\prime}}$')
 
 h1, l1 = ax1.get_legend_handles_labels()
 h2, l2 = ax2.get_legend_handles_labels()
 ax1.legend(h1 + h2, l1 + l2)
 
-savefile = "./png/Maxwell_sinuStrain_freqSweep_(tau={0:.2f}s,).png".format(tau)
+if axisoption == "-log":
+    savefile = "./png/Maxwell_sinuStrain_dynamicModuli(log)_(tau={0:.1f}s).png".format(tau)
+else:
+    savefile = "./png/Maxwell_sinuStrain_dynamicModuli(linear)_(tau={0:.1f}s).png".format(tau)
+
 fig.savefig(savefile, dpi=300)
 
 plt.show()
