@@ -1,5 +1,5 @@
-# ordinary differential equation of Maxwell model (sinusoidal strain) with animation
-# timeChart version
+# マクスウェルモデルの常微分方程式（振動歪み）
+# タイムラインチャート版
 
 import numpy as np
 from scipy.integrate import odeint
@@ -67,20 +67,23 @@ steps_pre = int(t_duration_pre * fps) + 1       # 総フレーム数
 t_pre = np.linspace(t_start_pre, t_event, steps_pre)
 strain_pre = np.zeros_like(t_pre)               # ステップ前の歪みはゼロ
 stress_pre = np.zeros_like(t_pre)               # ステップ前の応力はゼロ
+i_stress_pre = np.zeros_like(t_pre)
 af_pre = np.zeros_like(t_pre) 
 samp_pre = np.zeros_like(t_pre) 
 pdiff_pre = np.zeros_like(t_pre)
 t_start = t_pre[-1]
 
-s0 = 0                  # 初期条件として定義
+s0 = 0                  # ODEの初期条件として定義
+is0 = 0                 # 応力の積分の初期条件
 t_ani = t_pre
 strain = strain_pre     # 周波数掃引の全ての入力信号（歪み）を格納
 stress = stress_pre     # 周波数掃引の全ての出力信号（応力）を格納
+i_stress = i_stress_pre
 af_ani = af_pre         # 入力角周波数を格納（アニメーション用）
-samp_ani = samp_pre # 出力振幅の最大値を格納（アニメーション用
-pdiff_ani = pdiff_pre # 出力信号の位相を格納（アニメーション用）
-samp_list = []    # 各周波数での出力振幅の最大値を格納
-pdiff_list = []        # 各周波数での出力信号の位相を格納
+samp_ani = samp_pre     # 出力振幅の最大値を格納（アニメーション用
+pdiff_ani = pdiff_pre   # 出力信号の位相を格納（アニメーション用）
+samp_list = []          # 各周波数での出力振幅の最大値を格納
+pdiff_list = []         # 各周波数での出力信号の位相を格納
 
 # 各周波数での計算
 for freq in freq_list:
@@ -100,9 +103,14 @@ for freq in freq_list:
     strain = np.concatenate([strain, strain_f])
     # ODEの解析
     sol = odeint(Maxwell_sinuStrain, s0, t - t_start, args=(eamp,af,E,tau)) # ODEの解
-    stress_f = sol[:, 0]              # 応力履歴
+    stress_f = sol[:, 0]            # 応力履歴
     stress = np.concatenate([stress, stress_f]) 
-    s0 = stress[-1]
+    s0 = stress[-1]                 # 次のODE計算のために初期条件s0を更新
+    i_stress_f = integrate.cumulative_trapezoid(stress_f, t, initial=0)  # scipyを使った応力の積分
+    # 上で「initial=is0」としたいのだが、「0 or None to the initial argument is officially deprecated」とのことで以下の対応に変更
+    i_stress_f += is0               # 前の最後のi_stressにスムーズに繋ぐために全体からis0を減算
+    i_stress = np.concatenate([i_stress, i_stress_f])
+    is0 = i_stress[-1]              # 次の応力の積分の計算のために確保
     # 位相差の計算
     strain_latter = strain_f[int(0.4*len(strain_f)):]     # 後半部分を抽出（前半は過渡応答を含むから）
     stress_latter = stress_f[int(0.4*len(stress_f)):]     # 後半部分を抽出（前半は過渡応答を含むから）
@@ -123,11 +131,16 @@ e = strain/1.0     # 描画のためのスケーリング_
 s = stress/10**6   # 描画のためのスケーリング ([MPa]単位に変換)
 samp_ani = samp_ani/10**6
 samp_max = np.max(samp_list)/10**6
+e_s = s/(E/10**6)   # バネの歪み
+e_d = i_stress/eta   # ダッシュポットの歪み（本来はこちらが正しい）
+#e_d = e - e_s      # 簡単にはこちらでも良い    
 
 # グラフの初期設定
 fig = plt.figure(figsize=(8,5), tight_layout=True)
 ax1 = fig.add_subplot(111)
 ax2 = ax1.twinx()
+title_text = "Maxwell model: sinusoidal strain (frequecy sweep)"
+ax1.set_title(title_text)
 ax1.set_ylim(-3*eamp, 3*eamp)
 ax2.set_ylim(-2*samp_max, 2*samp_max)
 ax1.set_axisbelow(True)
@@ -146,8 +159,10 @@ ax1.text(0.1, 0.15, eq_text, transform=ax1.transAxes)
 res_text = r'$\tau$ = {0:.3f} s'.format(tau)
 ax1.text(0.1, 0.05, res_text, transform=ax1.transAxes)
 
-input, = ax1.plot([], [], 'b', animated=True, label='$\epsilon$ (input)')
-output, = ax2.plot([], [], 'r', animated=True, label='$\sigma$ (output)')
+strain, = ax1.plot([], [], 'b', animated=True, label='strain, $\epsilon$ (input)')
+strain_s, = ax1.plot([], [], 'g--', animated=True, label='strain, $\epsilon$ (spring)')
+strain_d, = ax1.plot([], [], 'y--', animated=True, label='strain, $\epsilon$ (dashpot)')
+stress, = ax2.plot([], [], 'r', animated=True, label='stress, $\sigma$ (output)')
 # ここでは[],[]としているが、下で実際の値を入れている
 
 h1, l1 = ax1.get_legend_handles_labels()
@@ -173,8 +188,10 @@ def animate(i):
     current_time = t_ani[i]
 
     # データの更新
-    input.set_data(t_ani[:i], e[:i])
-    output.set_data(t_ani[:i], s[:i])
+    strain.set_data(t_ani[:i], e[:i])
+    strain_s.set_data(t_ani[:i], e_s[:i])
+    strain_d.set_data(t_ani[:i], e_d[:i])
+    stress.set_data(t_ani[:i], s[:i])
 
     samp_text.set_text(samp_template % samp_ani[i])
     pdiff_text.set_text(pdiff_template % pdiff_ani[i])
@@ -190,7 +207,7 @@ def animate(i):
     # 時刻表示
     time_text.set_text(time_template % (i/fps + t_start_pre))
 
-    return input, output, samp_text, pdiff_text, af_text, aft_text, time_text
+    return strain, strain_s, strain_d, stress, samp_text, pdiff_text, af_text, aft_text, time_text
 
 # アニメーション実行   
 ani = animation.FuncAnimation(fig, animate, frames=len(t_ani), interval=interval_ms, blit=False, repeat=False)
