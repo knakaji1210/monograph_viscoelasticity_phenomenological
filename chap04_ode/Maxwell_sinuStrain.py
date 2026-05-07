@@ -99,7 +99,7 @@ ax1.set_ylabel('Applied Strain, $\epsilon$ /')
 ax1.set_title("Maxwell model: sinusoidal strain")
 ax1.grid(True, ls='--')
 
-line_strain, = ax1.plot([], [], color='blue', lw=2, label='Step strain (t = {0:.1f} s)'.format(event_time))
+line_strain, = ax1.plot([], [], color='blue', lw=2, label='Sinusoidal strain (t = {0:.1f} s)'.format(event_time))
 line_strain_s, = ax1.plot([], [], color='green', ls="dashed", lw=1, label='$\epsilon$ (spring)')
 line_strain_d, = ax1.plot([], [], color='orange', ls="dashed", lw=1, label='$\epsilon$ (dashpot)')
 ax1.legend(loc='upper right')
@@ -111,7 +111,7 @@ ax2.set_xlabel('$t$ /s')
 ax2.set_ylabel('Stress, $\sigma$ /MPa')
 ax2.grid(True, ls='--')
 
-line_stress, = ax2.plot([], [], color='red', lw=2, label='Response to step strain')
+line_stress, = ax2.plot([], [], color='red', lw=2, label='Response to sinusoidal strain')
 ax2.legend(loc='upper right')
 
 # テキスト描画
