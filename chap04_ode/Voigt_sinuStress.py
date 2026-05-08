@@ -34,6 +34,7 @@ except ValueError:
 
 af = 2*np.pi*freq
 
+# ODE解析で用いる関数の定義
 def Voigt_sinuStress(e, t, samp, af, E, tau):
 # e: 歪み, s: 応力, E: 弾性率, tau: 遅延時間
 # ここではsampとafを指定し、この中でsの関数を作り振動応力を実現
