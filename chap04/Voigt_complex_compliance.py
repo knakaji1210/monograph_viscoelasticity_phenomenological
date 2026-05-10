@@ -13,13 +13,13 @@ def reqParams():
         viscosity = float(input('Enter viscosity value (kPa s) (default = 100.0 kPa s): '))*10**3
     except ValueError:
         viscosity = 10**5
-    retardationTime = viscosity/infMod
-    return infMod, retardationTime
+    retardTime = viscosity/infMod
+    return infMod, retardTime
 
-def freqAxis(retardationTime):
-    centerAngFreq = 1 / retardationTime
+def freqAxis(retardTime):
+    centerAngFreq = 1 / retardTime
     angFreq = np.logspace(int(np.log10(centerAngFreq))-1.5, int(np.log10(centerAngFreq))+2.5, 51)
-    scaledAngFreq = angFreq*retardationTime
+    scaledAngFreq = angFreq*retardTime
     freqAxes = [angFreq, scaledAngFreq]
     return freqAxes
 
@@ -89,9 +89,9 @@ def curveFit(scaledAngFreq, fitAngFreqs):
 
 if __name__=='__main__':
     # calcul1ating dynamic compliance and loss tangent
-    infMod, retardationTime = reqParams()
-    param_text = r'($E_{{\infty}}$ = {0:.1f} MPa, $\tau$ = {1:.2f} s)'.format(infMod/10**6, retardationTime)
-    freqAxis = freqAxis(retardationTime)
+    infMod, retardTime = reqParams()
+    param_text = r'($E_{{\infty}}$ = {0:.1f} MPa, $\tau$ = {1:.2f} s)'.format(infMod/10**6, retardTime)
+    freqAxis = freqAxis(retardTime)
     fitting = -1
     try:
         select = int(input('Selection (complex compliance (linear): 0, complex compliance (log): 1, loss tangent: 2): '))
@@ -101,8 +101,8 @@ if __name__=='__main__':
     angFreq = freqAxis[0]
     scaledAngFreq = freqAxis[1]
     scaledAngFreq_label = r'log($\omega\tau$)'
-    strComp = complexComp(infMod, retardationTime, angFreq)[0]
-    losComp = complexComp(infMod, retardationTime, angFreq)[1]
+    strComp = complexComp(infMod, retardTime, angFreq)[0]
+    losComp = complexComp(infMod, retardTime, angFreq)[1]
     losTan = losComp / strComp
     log_scaledAngFreq = np.array([np.log10(f) for f in scaledAngFreq])
     log_strComp = np.log10(strComp)
