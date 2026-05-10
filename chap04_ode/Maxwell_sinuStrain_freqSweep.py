@@ -78,7 +78,6 @@ is0 = 0                 # 応力の積分の初期条件
 strain = strain_pre     # 周波数掃引の全ての入力信号（歪み）を格納
 stress = stress_pre     # 周波数掃引の全ての出力信号（応力）を格納
 i_stress = i_stress_pre
-af_ani = af_pre         # 入力角周波数を格納（アニメーション用）
 samp_ani = samp_pre     # 出力振幅の最大値を格納（アニメーション用
 pdiff_ani = pdiff_pre   # 出力信号の位相を格納（アニメーション用）
 samp_list = []          # 各周波数での出力振幅の最大値を格納
