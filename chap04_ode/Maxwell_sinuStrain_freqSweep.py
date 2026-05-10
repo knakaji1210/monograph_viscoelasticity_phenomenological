@@ -60,24 +60,8 @@ def getNearestIndex2value(list,value):
 t_start_pre = -2.0          # [s] 開始時間
 t_event = 0.0               # [s] 振動歪みを加える時刻
 t_duration_pre = t_event - t_start_pre          # [s] ステップ前の継続時間
-fps = 1000                   # 1秒あたりのフレーム数
+fps = 1000                  # 1秒あたりのフレーム数
 # ここではフレーム数としては意味がないが、stepsを決めるために使っている。細かくデータを取るために1000を代入している
-interval_ms = 1000 / fps    # 1コマあたりのミリ秒
-steps_pre = int(t_duration_pre * fps) + 1       # 総フレーム数
-t_pre = np.linspace(t_start_pre, t_event, steps_pre)
-strain_pre = np.zeros_like(t_pre)               # ステップ前の歪みはゼロ
-stress_pre = np.zeros_like(t_pre)               # ステップ前の応力はゼロ
-i_stress_pre = np.zeros_like(t_pre)
-af_pre = np.zeros_like(t_pre) 
-samp_pre = np.zeros_like(t_pre) 
-pdiff_pre = np.zeros_like(t_pre)
-t_start = t_pre[-1]
-
-# データ準備
-t_start_pre = -2.0          # [s] 開始時間
-t_event = 0.0               # [s] 振動歪みを加える時刻
-t_duration_pre = t_event - t_start_pre          # [s] ステップ前の継続時間
-fps = 60                    # 1秒あたりのフレーム数、30だと足りないので60に変更
 interval_ms = 1000 / fps    # 1コマあたりのミリ秒
 steps_pre = int(t_duration_pre * fps) + 1       # 総フレーム数
 t_pre = np.linspace(t_start_pre, t_event, steps_pre)
@@ -91,7 +75,6 @@ t_start = t_pre[-1]
 
 s0 = 0                  # ODEの初期条件として定義
 is0 = 0                 # 応力の積分の初期条件
-t_ani = t_pre
 strain = strain_pre     # 周波数掃引の全ての入力信号（歪み）を格納
 stress = stress_pre     # 周波数掃引の全ての出力信号（応力）を格納
 i_stress = i_stress_pre
@@ -105,11 +88,10 @@ pdiff_list = []         # 各周波数での出力信号の位相を格納
 for freq in freq_list:
     # データ準備
 #    t_duration = np.where(4.0/freq > 30.0, 2.0/freq, 4.0/freq)    # [s] 継続時間（アニメーション用）
-    t_duration = 20.0/freq    # [s] 継続時間
+    t_duration = 20.0/freq              # [s] 継続時間
     steps = int(t_duration * fps) + 1   # 総フレーム数
     t_end = t_start + t_duration
     t = np.linspace(t_start, t_end, steps)
-    t_ani = np.concatenate([t_ani, t]) 
 #    print(t[0],t[-1],len(t))
     af = 2*np.pi*freq
     strain_f = eamp*np.sin(af*(t - t_start))        # 入力信号
