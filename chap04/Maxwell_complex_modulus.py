@@ -126,6 +126,7 @@ if __name__=='__main__':
         y1 = log_strMod
         y2 = log_losMod
         y_label = r'log($E^\prime$, $E^{{\prime\prime}}$ /Pa)'
+        print(np.max(y1))
         ylim = [np.min(y1)-2, np.max(y1)+2]
         label1 = r'$E^\prime$ (log)'
         label2 = r'$E^{{\prime\prime}}$ (log)'
@@ -172,7 +173,6 @@ if __name__=='__main__':
     if fitting == 0:
         ax.plot(log_scaledAngFreq, fit_strMod, c='r', lw=1, ls=':', label=r'fitted $E^{\prime}$')
         ax.plot(log_scaledAngFreq, fit_losMod, c='b', lw=1, ls=':', label=r'fitted $E^{{\prime\prime}}$')
-        ylim = [np.min(y1)-2, np.max(y1)+2]
         fig.text(0.7, 0.30, fit_result1)
         fig.text(0.7, 0.25, fit_result2)
 
