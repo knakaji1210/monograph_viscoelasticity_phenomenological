@@ -20,13 +20,13 @@ def reqParams():
     except ValueError:
         E1 = 10**6                  # [Pa] modulus
     try:
-        E2 = float(input('modulus 2 [MPa] (default = 0.5 MPa): '))*10**6
+        E2 = float(input('modulus 2 [MPa] (default = 0.2 MPa): '))*10**6
     except ValueError:
-        E2 = 5*10**5                # [Pa] modulus
+        E2 = 2*10**5                # [Pa] modulus
     try:
         eta = float(input('viscosity [kPa s] (default = 500.0 kPa s): '))*10**3
     except ValueError:
-        eta = 5*10**5                 # [Pa s] viscosity
+        eta = 5*10**5               # [Pa s] viscosity
 
     insMod = E1                     # [Pa] instantaneous modulus
     infMod = E1*E2/(E1+E2)          # [Pa] equilibrium modulus
@@ -44,13 +44,13 @@ def timeAxis(retardTime):
 
 def fitTimes():
     try:
-        minTime = float(input('Enter minimum time for fitting in log scale (default = -0.5): '))
+        minTime = float(input('Enter minimum time for fitting in log scale (default = -2.0): '))
     except ValueError:
-        minTime = -0.5
+        minTime = -2.0
     try:
-        maxTime = float(input('Enter maximum time for fitting in log scale (default = 0.2): '))
+        maxTime = float(input('Enter maximum time for fitting in log scale (default = -1.0): '))
     except ValueError:
-         maxTime = 0.2
+         maxTime = -1.0
     fitTimes = [minTime, maxTime]
     return fitTimes
 
@@ -81,9 +81,8 @@ def curveFit(x, y, fitTimes):
 if __name__=='__main__':
     # calculating creep compliance and creep funcion
     E1, E2, eta, insMod, infMod, k, retardTime = reqParams()
-    print(retardTime)
     param_text = r'($E_1$ = {0:.1f} MPa, $E_2$ = {1:.1f} MPa, $\eta$ = {2:.1f} kPa s)'.format(E1/10**6, E2/10**6, eta/10**3)
-    res_text = r'$E_i$ = {0:.1f} MPa, $E_\infty$ = {1:.1f} MPa, $\tau$ = {2:.2f} s'.format(insMod/10**6, infMod/10**6, retardTime)
+    res_text = r'$E_i$ = {0:.2f} MPa, $E_\infty$ = {1:.2f} MPa, $\tau$ = {2:.2f} s'.format(insMod/10**6, infMod/10**6, retardTime)
     timeAxis = timeAxis(retardTime)
     try:
         select = int(input('Selection (creep compliance: 0, creep function: 1): '))
