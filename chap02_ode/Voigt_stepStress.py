@@ -90,8 +90,8 @@ ax2.set_xlabel('$t$ /s')
 ax2.set_ylabel('Strain, $\epsilon$ /')
 ax2.grid(True, ls='--')
 
-line_strain, = ax2.plot([], [], color='blue', lw=2, label='Response to step strain')
-ax1.legend(loc='upper right')
+line_strain, = ax2.plot([], [], color='blue', lw=2, label='Response to step stress')
+ax2.legend(loc='upper right')
 
 # テキスト描画
 var_text = r'$\sigma_0$ = {0:.2f} MPa, $E$ = {1:.1f} MPa, $\eta$ = {2:.1f} kPa s'.format(stress_i/10**6,E/10**6,eta/10**3)
