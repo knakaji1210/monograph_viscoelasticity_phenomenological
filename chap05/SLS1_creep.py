@@ -26,13 +26,13 @@ def reqParams():
     try:
         eta = float(input('viscosity [kPa s] (default = 500.0 kPa s): '))*10**3
     except ValueError:
-        eta = 5*10**5               # [Pa s] viscosity
+        eta = 5*10**5                 # [Pa s] viscosity
 
     insMod = E1                     # [Pa] instantaneous modulus
     infMod = E1*E2/(E1+E2)          # [Pa] equilibrium modulus
     k = insMod/infMod
     retardTime = eta/E2             # [s] retardation time
-    return insMod, infMod, k, retardTime
+    return E1, E2, eta, insMod, infMod, k, retardTime
 
 def timeAxis(retardTime):
     log_relaxT = np.log10(retardTime)
@@ -80,9 +80,10 @@ def curveFit(x, y, fitTimes):
 
 if __name__=='__main__':
     # calculating creep compliance and creep funcion
-    insMod, infMod, k, retardTime = reqParams()
+    E1, E2, eta, insMod, infMod, k, retardTime = reqParams()
     print(retardTime)
-    param_text = r'($E_i$ = {0:.1f} MPa, $E_\infty$ = {1:.1f} MPa, $\tau$ = {2:.2f} s)'.format(insMod/10**6, infMod/10**6, retardTime)
+    param_text = r'($E_1$ = {0:.1f} MPa, $E_2$ = {1:.1f} MPa, $\eta$ = {2:.1f} kPa s)'.format(E1/10**6, E2/10**6, eta/10**3)
+    res_text = r'$E_i$ = {0:.1f} MPa, $E_\infty$ = {1:.1f} MPa, $\tau$ = {2:.2f} s'.format(insMod/10**6, infMod/10**6, retardTime)
     timeAxis = timeAxis(retardTime)
     try:
         select = int(input('Selection (creep compliance: 0, creep function: 1): '))
@@ -155,6 +156,7 @@ if __name__=='__main__':
     ax1.legend(loc=legend_loc)
     ax1.vlines(1, 0, y1[idx1], color='k', ls='dashed')
     ax1.set_axisbelow(True)
+    ax1.text(0.05, 0.8, res_text, transform=ax1.transAxes)
     ax2 = fig.add_subplot(212)
     ax2.set_xlabel(x2_label)
     ax2.set_ylabel(y2_label)
