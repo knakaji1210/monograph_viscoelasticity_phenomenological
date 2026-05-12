@@ -68,7 +68,7 @@ strain = np.concatenate([strain_pre, strain_post])
 # 描画のためのスケーリング
 e = strain/1.0          # 描画のためのスケーリング
 s = stress/10**6        # 描画のためのスケーリング ([MPa]単位に変換)
-e1 = s*10**6/E1               # [] バネ1の歪み
+e1 = s*10**6/E1         # [] バネ1の歪み
 e2 = e - e1             # [] フォークト要素の歪み
 s1 = E2*e2/10**6        # [MPa] フォークト要素のバネ2の応力
 de2dt = np.gradient(e2, t)  # numpyを使ったフォークト要素の歪みの微分
