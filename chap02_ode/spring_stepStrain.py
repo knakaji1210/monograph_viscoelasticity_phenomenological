@@ -17,9 +17,9 @@ except ValueError:
 
 # 初期条件の設定
 try:
-    strain_i = float(input('step strain (default = 0.1): '))
+    strain_i = float(input('step strain (default = 0.5): '))
 except ValueError:
-    strain_i = 0.1         # [] ステップ歪み
+    strain_i = 0.5         # [] ステップ歪み
 
 # ODE解析で用いる関数の定義
 def spring_stepStrain(s, t, e, E):

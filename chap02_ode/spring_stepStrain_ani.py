@@ -80,7 +80,7 @@ ax.plot([0,0],[-1.8,-2.2], c='g')
 ax.plot([l,l],[-1.8,-2.2], c='g')
 
 # テキスト描画
-var_text = r'$\epsilon_0$ = {0:.2f} MPa, $E$ = {1:.1f} MPa'.format(strain_i,E/10**6)
+var_text = r'$\epsilon_0$ = {0:.2f}, $E$ = {1:.1f} MPa'.format(strain_i,E/10**6)
 ax.text(0.5, 0.9, var_text, transform=ax.transAxes)
 eq_text = r'$\sigma = E\epsilon_0$'
 ax.text(0.5, 0.8, eq_text, transform=ax.transAxes)
