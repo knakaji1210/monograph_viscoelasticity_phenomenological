@@ -30,9 +30,9 @@ tau = eta/E2                # [s] 遅延時間
 
 # 初期条件の設定
 try:
-    stress_i = float(input('step stress [MPa] (default = 0.05 MPa): '))*10**6
+    stress_i = float(input('step stress [MPa] (default = 0.04 MPa): '))*10**6
 except ValueError:
-    stress_i = 0.05*10**6         # [Pa] ステップ応力
+    stress_i = 0.04*10**6         # [Pa] ステップ応力
 
 # ODE解析で用いる関数の定義
 def SLS1_stepStress(e, t, s, infMod, tau):

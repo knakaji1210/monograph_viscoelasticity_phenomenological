@@ -31,9 +31,9 @@ tau = eta/E2                # [s] 遅延時間
 
 # 初期条件の設定
 try:
-    stress_i = float(input('step stress [MPa] (default = 0.05 MPa): '))*10**6
+    stress_i = float(input('step stress [MPa] (default = 0.04 MPa): '))*10**6
 except ValueError:
-    stress_i = 0.05*10**6         # [Pa] ステップ応力
+    stress_i = 0.04*10**6         # [Pa] ステップ応力
 
 # ODE解析で用いる関数の定義
 def SLS1_stepStress(e, t, s, infMod, tau):
@@ -78,7 +78,8 @@ l = 0.1            # [m] 自然長
 w = 0.5            # 要素の長さと幅の比率
 # 直列なので自然長l0=2*lとなっている
 el = e*2*l         # [m] 全体の伸び
-e2l = e2*l          # Voigt要素部分
+el_s = e1*2*l        # [m] 単独バネの伸び
+el_v = e2*2*l        # [m] Voigt要素部分の伸び
 
 # グラフの初期設定
 fig = plt.figure(figsize=(8,5), tight_layout=True)
@@ -95,23 +96,23 @@ ax.set_ylim(-5,5)
 y_0 = [0, 0]
 y_1 = [1, 1]
 y_2 = [-1, -1]
-ax.plot([0, l/4],y_0, c='b')
-ax.plot([l/4, 9*l/4],[-2,-2], c='g')
-ax.plot([l/4, l/4],[-1.8,-2.2], c='g')
-ax.plot([9*l/4, 9*l/4],[-1.8,-2.2], c='g')
-ax.plot([l/4,l/4],[1,-1], c='b')
-ax.plot([l/4, (0.08+1/4)*l],y_1, c='b')
-ax.plot([l/4, l/2],y_2, c='b')
-ax.plot(0,0,'ro', markersize='10')
+ax.plot([-l/4, 0],y_0, c='b')
+ax.plot([0, 2*l],[-2,-2], c='g')
+ax.plot([0, 0],[-1.8,-2.2], c='g')
+ax.plot([2*l, 2*l],[-1.8,-2.2], c='g')
+ax.plot([0, 0],[1,-1], c='b')
+ax.plot([0, 0.08*l],y_1, c='b')
+ax.plot([0, l/4],y_2, c='b')
+ax.plot(-l/4,0,'ro', markersize='10')
 
 # ダッシュポット描画の準備
-x_d1 = [(0.08+1/4)*l, (0.92+1/4)*l]
+x_d1 = [0.08*l, 0.92*l]
 y_d1 = [w+1, w+1]
 y_d2 = [-w+1, -w+1]
 ax.plot(x_d1,y_d1, c='b')
 ax.plot(x_d1,y_d2, c='b')
-ax.plot([(0.08+1/4)*l,(0.08+1/4)*l],[w+1,-w+1], c='b')
-rect = patches.Rectangle(xy=((0.08+1/4)*l, -w+1), width=0.83*l, height=2*w, facecolor='y')
+ax.plot([0.08*l,0.08*l],[w+1,-w+1], c='b')
+rect = patches.Rectangle(xy=(0.08*l, -w+1), width=0.83*l, height=2*w, facecolor='y')
 ax.add_patch(rect)
 
 # テキスト描画
@@ -121,7 +122,7 @@ eq_text = r'd$\epsilon$/d$t$ = ($\sigma_0$/$E_{{{\infty}}}$ - $\epsilon$)/$\tau$
 ax.text(0.4, 0.8, eq_text, transform=ax.transAxes)
 res_text = r'$E_i$ = {0:.2f} MPa, $E_\infty$ = {1:.2f} MPa, $\tau$ = {2:.2f} s'.format(insMod/10**6, infMod/10**6, tau)
 ax.text(0.4, 0.7, res_text, transform=ax.transAxes)
-ax.text(0.5, 0.25, '$l_0$', transform=ax.transAxes)
+ax.text(0.4, 0.25, '$l_0$', transform=ax.transAxes)
 
 # 枠組みの描画2
 bar, = ax.plot([],[], 'b', animated=True)
@@ -150,21 +151,20 @@ def init():               # FuncAnimationでinit_funcで呼び出す
 
 def update(i):              # ここのiは下のframes=np.arange(0, len(t))に対応した引数になっている
     # 枠組み
-    x_o = l + e2l[i]
-    x_c = l/4 + x_o
-    x_p = 9*l/4+el[i]
-    bar.set_data([x_c,x_c],[1,-1])
-    x_rod = [x_c, l/4+x_c]
+    x_o = l + el_v[i]
+    x_p = 2*l+el[i]
+    bar.set_data([x_o,x_o],[1,-1])
+    x_rod = [x_o, l/4 + x_o]
     rod.set_data(x_rod,y_0)
     # フォークト要素のバネ
-    x_rod_sp2 = [x_o, x_c]
+    x_rod_sp2 = [x_o - l/4, x_o]
     rod_sp2.set_data(x_rod_sp2,y_2)
-    x_tri2 = np.linspace(l/2, x_o,100)
-    y_tri2 = w*((2/3)*np.arccos(np.cos(6*np.pi*(x_tri2 - l/2)/(e2l[i]+l/2)-np.pi/2+0.1))-3)
+    x_tri2 = np.linspace(l/4, x_o - l/4,100)
+    y_tri2 = w*((2/3)*np.arccos(np.cos(6*np.pi*(x_tri2 - l/4)/(el_v[i]+l/2)-np.pi/2+0.1))-3)
     triangle2.set_data(x_tri2,y_tri2)
     # フォークト要素のダッシュポット
-    x_rod_da = [x_o-l/4, x_c]
-    x_damp = x_o-l/4
+    x_rod_da = [x_o-l/2, x_o]
+    x_damp = x_o - l/2
     y_damp = 0.7*w
     x_damper = [x_damp, x_damp]
     y_damper = [y_damp+1, -y_damp+1]
@@ -173,8 +173,8 @@ def update(i):              # ここのiは下のframes=np.arange(0, len(t))に�
     # 単独のバネ
     x_rod_sp1 = [x_p-l/4 , x_p]
     rod_sp1.set_data(x_rod_sp1,y_0)
-    x_tri1 = np.linspace(x_c+l/4, x_p-l/4,100)
-    y_tri1 = w*((2/3)*np.arccos(np.cos(6*np.pi*(x_tri1 - x_c - l/4)/(el[i]-e2l[i]+l/2)-np.pi/2+0.1))-1)
+    x_tri1 = np.linspace(x_o+l/4, x_p-l/4,100)
+    y_tri1 = w*((2/3)*np.arccos(np.cos(6*np.pi*(x_tri1 - x_o - l/4)/(el_s[i]+l/2)-np.pi/2+0.1))-1)
     triangle1.set_data(x_tri1,y_tri1)
     point.set_data([x_p],[0])    
     time_text.set_text(time_template % (t[i]))
