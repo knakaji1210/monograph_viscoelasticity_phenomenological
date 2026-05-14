@@ -5,14 +5,14 @@ import matplotlib.pyplot as plt
 
 def reqParams():
     try:
-        Freq = float(input('Enter frequency value (Hz) (default = 0.3183 Hz ): '))
+        freq = float(input('Enter frequency value (Hz) (default = 0.3183 Hz ): '))
     except ValueError:
-        Freq = 0.3183
-    angFreq = 2*np.pi*Freq
+        freq = 0.3183
+    angFreq = 2*np.pi*freq
     try:
-        stress_amp = float(input('stress amplitute [MPa] (default = 0.04 MPa): '))*10**6
+        stress_amp = float(input('stress amplitute [MPa] (default = 0.02 MPa): '))*10**6
     except ValueError:
-        stress_amp = 0.04*10**6     # [Pa] 応力振幅
+        stress_amp = 0.02*10**6     # [Pa] 応力振幅
     try:
         select = int(input('Selection (SLS I : 0, SLS II: 1): '))
     except ValueError:
@@ -41,8 +41,8 @@ def reqParams():
         denom = insMod*(1 + tau*angFreq*(2j/2)) 
         comComp = numer/denom
         modeltext = r'SLS I model'
-        figtext = r'$\tau$ = {0:.2f} s, $f$ = {1:.3f} Hz, $\omega\tau$ = {2:.2f}'.format(tau, Freq, angFreq*tau)
-        savefile = './png/sinuStress_SLS_I.png'
+        figtext = r'$\tau$ = {0:.2f} s, $f$ = {1:.3f} Hz, $\omega\tau$ = {2:.2f}'.format(tau, freq, angFreq*tau)
+        savefile = './png/sinuStress_SLS1_(f={0:.2f}Hz).png'.format(freq)
 
     if select == 1:
         # 変数の設定
@@ -67,8 +67,8 @@ def reqParams():
         denom = insMod*(1/k + tau*angFreq*(2j/2))
         comComp = numer/denom
         modeltext = r'SLS II model'
-        figtext = r'$\tau$ = {0:.2f} s, $f$ = {1:.3f} Hz, $\omega\tau$ = {2:.2f}'.format(tau, Freq, angFreq*tau)
-        savefile = './png/sinuStress_SLS_II.png'
+        figtext = r'$\tau$ = {0:.2f} s, $f$ = {1:.3f} Hz, $\omega\tau$ = {2:.2f}'.format(tau, freq, angFreq*tau)
+        savefile = './png/sinuStress_SLS2_(f={0:.2f}Hz).png'.format(freq)
 
     return angFreq, stress_amp, comComp, modeltext, figtext, savefile
 
@@ -97,6 +97,7 @@ if __name__=='__main__':
     stress = np.real(compStress)
     compStrain = calc_compStrain(compStress, comComp)
     strain = np.real(compStrain)
+    restext = r'$\epsilon_{{amp}}$ = {0:.3f}'.format(np.max(strain))
     stress /= 10**6             # rescale to MPa    
     param_text = r'($J^\prime$ = {0:.2f} MPa$^{{-1}}$, $J^{{\prime\prime}}$ = {1:.2f} MPa$^{{-1}}$)'.format(comComp.real*10**6,-comComp.imag*10**6)
     
@@ -122,6 +123,7 @@ if __name__=='__main__':
 
     fig.text(0.15, 0.85, modeltext)
     fig.text(0.15, 0.15, figtext)
+    fig.text(0.15, 0.20, restext)
 
     fig.savefig(savefile, dpi=300)
 
