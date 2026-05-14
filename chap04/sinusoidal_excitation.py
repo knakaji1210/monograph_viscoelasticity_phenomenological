@@ -10,7 +10,7 @@ def reqParams():
         Freq = 1.0
     angFreq = 2*np.pi*Freq
     try:
-        select = int(input('Selection (general : 0, Hooke: 1, Newton: 2, Maxwell: 3, SLS II: 4): '))
+        select = int(input('Selection (general : 0, Hooke: 1, Newton: 2, Maxwell: 3): '))
     except ValueError:
         select = 0
 
@@ -64,28 +64,6 @@ def reqParams():
         tau = viscosity/insMod
         figtext = r'$\tau$ = {0:.2f} s, $f$ = {1:.3f} Hz, $\omega\tau$ = {2:.2f}'.format(tau, Freq, angFreq*tau)
         savefile = './png/sinusoidal_excitation_Maxwell_(f={0:.2f}Hz).png'.format(Freq)
-
-    if select == 4:
-        try:
-            insMod = float(input('Enter instantaneous modulus value (MPa) (default = 10.0 MPa): '))*10**6
-        except ValueError:
-            insMod = 10**7
-        try:
-            infMod = float(input('Enter equilibrium modulus value (MPa) (default = 1.0 MPa): '))*10**6
-        except ValueError:
-            infMod = 10**6
-        try:
-            viscosity = float(input('Enter viscosity value (kPa s) (default = 900.0 kPa s): '))*10**3
-        except ValueError:
-            viscosity = 9*10**5
-        modulus = insMod - infMod
-        retardTime = viscosity/modulus
-        k = insMod/infMod
-        numer = insMod*(1/k + retardTime*angFreq*(2j/2))
-        denom = 1 + retardTime*angFreq*(2j/2)
-        comMod = numer/denom
-        figtext = r'$f$ = {0:.3f} Hz'.format(Freq)
-        savefile = './png/sinusoidal_excitation_slsII.png'
 
     return angFreq, comMod, figtext, savefile
 
