@@ -173,11 +173,11 @@ else:
     ax2.set_ylabel(r'loss compliance, $J^{{\prime\prime}}$ /MPa$^{{-1}}$')
 
 var_text = r'$\sigma_{{amp}}$ = {0:.2f} MPa, $E$ = {1:.1f} MPa, $\eta$ = {2:.1f} kPa s'.format(samp/10**6,E/10**6,eta/10**3)
-ax1.text(0.15, 0.3, var_text, transform=ax1.transAxes)
+ax1.text(0.5, 0.8, var_text, transform=ax1.transAxes)
 eq_text = r'd$\epsilon$/d$t$ = ($\sigma$/$E$ - $\epsilon$)/$\tau$'
-ax1.text(0.15, 0.2, eq_text, transform=ax1.transAxes)
+ax1.text(0.5, 0.7, eq_text, transform=ax1.transAxes)
 res_text = r'$\tau$ = {0:.2f} s'.format(tau)
-ax1.text(0.15, 0.1, res_text, transform=ax1.transAxes)
+ax1.text(0.5, 0.6, res_text, transform=ax1.transAxes)
 
 ax1.plot(aft_array,strComp, 'ro-', label=r'$J^{{\prime}}$')
 ax2.plot(aft_array,losComp, 'bo-', label=r'$J^{{\prime\prime}}$')
