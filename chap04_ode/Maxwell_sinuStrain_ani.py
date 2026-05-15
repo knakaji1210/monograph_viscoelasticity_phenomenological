@@ -158,12 +158,12 @@ damper, = ax.plot([],[], 'b', lw=4, animated=True)
 # ここでは[],[]としているが、下で***.set_dataで実際の値を入れている
 
 # 歪みの描画
-strain, = ax.plot([],[], 'b', lw=2, animated=True)
+strain_bar, = ax.plot([],[], 'b', lw=2, animated=True)
 arrow_e_p, = ax.plot([],[], 'b', marker=9, markersize='10', animated=True)
 arrow_e_n, = ax.plot([],[], 'b', marker=8, markersize='10', animated=True)
 
 # 応力の描画
-stress, = ax.plot([],[], 'r', lw=2, animated=True)
+stress_bar, = ax.plot([],[], 'r', lw=2, animated=True)
 arrow_s_p, = ax.plot([],[], 'r', marker=9, markersize='10', animated=True)
 arrow_s_n, = ax.plot([],[], 'r', marker=8, markersize='10', animated=True)
 
@@ -174,7 +174,7 @@ time_text = ax.text(0.1, 0.9, '', transform=ax.transAxes)
 # アニメーション更新関数
 def init():               # FuncAnimationでinit_funcで呼び出す
     time_text.set_text('')
-    return rod, point, triangle, rod_da, damper, strain, arrow_e_p, arrow_e_n, time_text
+    return rod, point, triangle, rod_da, damper, strain_bar, arrow_e_p, arrow_e_n, stress_bar, arrow_s_p, arrow_s_n, time_text
 
 def update(i):              # ここのiは下のframes=np.arange(0, len(t))に対応した引数になっている
     # 枠組み
@@ -198,7 +198,7 @@ def update(i):              # ここのiは下のframes=np.arange(0, len(t))に�
     damper.set_data(x_damper,y_damper)
     # 歪み
     x_strain = [2*l, 2*l + el[i]]
-    strain.set_data(x_strain,[-1,-1])
+    strain_bar.set_data(x_strain,[-1,-1])
     if el[i] > 0:
         arrow_e_p.set_data([2*l + el[i]],[-1])
     else:
@@ -206,14 +206,14 @@ def update(i):              # ここのiは下のframes=np.arange(0, len(t))に�
     # 応力
     a = 1.0    # 見かけ上の振幅
     x_stress = [2*l, 2*l + a*s[i]]
-    stress.set_data(x_stress,[-2,-2])
+    stress_bar.set_data(x_stress,[-2,-2])
     if s[i] > 0:
         arrow_s_p.set_data([2*l + a*s[i]],[-2])
     else:
         arrow_s_n.set_data([2*l + a*s[i]],[-2])
     # 時刻
     time_text.set_text(time_template % (t[i]))
-    return rod, point, triangle, rod_da, damper, strain, arrow_e_p, arrow_e_n, time_text
+    return rod, point, triangle, rod_da, damper, strain_bar, arrow_e_p, arrow_e_n, stress_bar, arrow_s_p, arrow_s_n, time_text
 
 '''
 y_triの中の重要部分は
