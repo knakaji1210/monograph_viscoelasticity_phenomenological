@@ -30,11 +30,11 @@ tau = eta/E2                # [s] 緩和時間
 
 # 振動歪みの設定
 try:
-    samp = float(input('amplitude for sinusoidal stress [MPa] (default=0.04): '))*10**6
+    samp = float(input('amplitude for sinusoidal stress [MPa] (default=0.02): '))*10**6
 except ValueError:
-    samp = 0.04*10**6
+    samp = 0.02*10**6
 try:
-    freq = float(input('frequency for sinusoidal strain [Hz] (default=0.3183 Hz): '))
+    freq = float(input('frequency for sinusoidal stress [Hz] (default=0.3183 Hz): '))
 except ValueError:
     freq = 1/np.pi
 
@@ -106,7 +106,7 @@ ax1.set_ylabel('Stress, $\sigma$ /MPa')
 ax1.set_title("SLS I model: sinusoidal stress")
 ax1.grid(True, ls='--')
 
-line_stress, = ax1.plot([], [], color='red', lw=2, label='Step stress (t = {0:.1f} s)'.format(event_time))
+line_stress, = ax1.plot([], [], color='red', lw=2, label='Sinusoidal stress (t = {0:.1f} s)'.format(event_time))
 line_stress_s1, = ax1.plot([], [], color='green', ls="dashed", lw=1, label='$\sigma$ (spring 2 in Voigt)')
 line_stress_s2, = ax1.plot([], [], color='orange', ls="dashed", lw=1, label='$\sigma$ (dashpot in Voigt)')
 ax1.legend(loc='upper right')
@@ -118,10 +118,10 @@ ax2.set_xlabel('$t$ /s')
 ax2.set_ylabel('Applied strain, $\epsilon$ /')
 ax2.grid(True, ls='--')
 
-line_strain, = ax2.plot([], [], color='blue', lw=2, label='Response to step stress')
+line_strain, = ax2.plot([], [], color='blue', lw=2, label='Response to sinusoidal stress')
 line_strain_e1, = ax2.plot([], [], color='cyan', ls="dashed", lw=1, label='$\epsilon$ (spring 1)')
 line_strain_e2, = ax2.plot([], [], color='gray', ls="dashed", lw=1, label='$\epsilon$ (Voigt)')
-ax1.legend(loc='upper right')
+ax2.legend(loc='upper right')
 
 # テキスト描画
 var_text = r'$\sigma_{{amp}}$ = {0:.2f} MPa, $E_1$ = {1:.1f} MPa, $E_2$ = {2:.1f} MPa, $\eta$ = {3:.1f} kPa s'.format(samp/10**6,E1/10**6,E2/10**6,eta/10**3)
