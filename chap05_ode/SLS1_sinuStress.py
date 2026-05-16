@@ -128,7 +128,6 @@ var_text = r'$\sigma_{{amp}}$ = {0:.2f} MPa, $E_1$ = {1:.1f} MPa, $E_2$ = {2:.1f
 ax1.text(0.1, 0.9, var_text, transform=ax1.transAxes)
 eq_text = r'd$\epsilon$/d$t$ = ($k$$\sigma$/$E_i$ + $\tau$/$E_i$ d$\sigma$/d$t$ - $\epsilon$)/$\tau$'
 ax2.text(0.1, 0.9, eq_text, transform=ax2.transAxes)
-
 res_text = r'$E_i$ = {0:.2f} MPa, $E_\infty$ = {1:.2f} MPa, $\tau$ = {2:.2f} s, $\omega\tau$ = {3:.3f}'.format(insMod/10**6, infMod/10**6, tau, af*tau)
 ax2.text(0.1, 0.8, res_text, transform=ax2.transAxes)
 eamp_text = r'$\epsilon_{{amp}}$ = {0:.3f}'.format(e_max)
