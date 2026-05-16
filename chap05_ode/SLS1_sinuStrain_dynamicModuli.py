@@ -1,9 +1,9 @@
-# SLS Iの常微分方程式（振動応力）
-# 周波数応答（動的コンプライアンス）
+# SLS Iの常微分方程式（振動歪み）
+# 周波数応答（動的弾性率）
 
 '''
 How to use
-% python3 SLS1_sinuStress_dynamicComp.py args[1]
+% python3 SLS1_sinuStrain_dynamicModuli.py args[1]
 args: -log
 "-log"をつけると縦軸をログスケールに変換
 何もついていないか、間違えたものがついている時はリニアスケールで表示
@@ -48,33 +48,33 @@ tau = eta/E2                # [s] 緩和時間
 
 # 振動応力の設定
 try:
-    log_freq_min = float(input('log(freq_min) for forced oscillation (default=-1.8): '))
+    log_freq_min = float(input('log(freq_min) for forced oscillation (default=-1.2): '))
 except ValueError:
-    log_freq_min = -1.8
+    log_freq_min = -1.2
 try:
-    log_freq_max = float(input('log(freq_max) for forced oscillation (default=1.2): '))
+    log_freq_max = float(input('log(freq_max) for forced oscillation (default=1.5): '))
 except ValueError:
-    log_freq_max = 1.2
+    log_freq_max = 1.5
 try:
     num_freq = int(input('number of frequency (default=31): '))
 except ValueError:
     num_freq = 31
 try:
-    samp = float(input('amplitude for sinusoidal stress [MPa] (default=0.2): '))*10**6
+    eamp = float(input('amplitude for sinusoidal strain [] (default=0.2): '))
 except ValueError:
-    samp = 0.2*10**6
+    eamp = 0.2
 
 freq_list = np.logspace(log_freq_min, log_freq_max, num_freq)
 aft_array = 2 * np.pi * freq_list * tau
 
 # ODE解析で用いる関数の定義
-def SLS1_sinuStress(e, t, samp, af, insMod, k, tau):
+def SLS1_sinuStrain(s, t, eamp, af, insMod, k, tau):
 # e: 歪み, s: 応力, insMod: 瞬間弾性率, tau: 緩和時間
-# ここではsampとafを指定し、この中でsの関数を作り振動歪みを実現
-    s = samp*np.sin(af*t)
-    dsdt = samp*af*np.cos(af*t)
-    dedt = (k*s/insMod + tau*dsdt/insMod - e)/tau   # (5.11'')
-    return dedt
+# ここではeampとafを指定し、この中でeの関数を作り振動歪みを実現
+    e = eamp*np.sin(af*t)
+    dedt = eamp*af*np.cos(af*t)
+    dsdt = (insMod*e + insMod*tau*dedt - k*s)/tau   # (5.11')
+    return dsdt
 
 def getNearestIndex2value(list,value):
     index = np.abs(np.array(list) -value).argsort()[0].tolist()
@@ -97,11 +97,11 @@ eamp_pre = np.zeros_like(t_pre)
 pdiff_pre = np.zeros_like(t_pre)
 t_start = t_pre[-1]
 
-e0 = 0                  # ODEの初期条件として定義
+s0 = 0                  # ODEの初期条件として定義
 strain = strain_pre     # 周波数掃引の全ての入力信号（歪み）を格納
 stress = stress_pre     # 周波数掃引の全ての出力信号（応力）を格納
 dedt = dedt_pre
-eamp_list = []          # 各周波数での出力振幅の最大値を格納
+samp_list = []          # 各周波数での出力振幅の最大値を格納
 pdiff_list = []         # 各周波数での出力信号の位相を格納
 
 # 各周波数での計算
@@ -114,91 +114,91 @@ for freq in freq_list:
     t = np.linspace(t_start, t_end, steps)
 #    print(t[0],t[-1],len(t))
     af = 2*np.pi*freq
-    stress_f = samp*np.sin(af*(t - t_start))        # 入力信号
-    stress = np.concatenate([stress, stress_f])
+    strain_f = eamp*np.sin(af*(t - t_start))        # 入力信号
+    strain = np.concatenate([strain, strain_f])
     # ODEの解析
-    sol = odeint(SLS1_sinuStress, e0, t - t_start, args=(samp,af,insMod,k,tau)) # ODEの解
-    strain_f = sol[:, 0]            # 応力履歴
-    strain = np.concatenate([strain, strain_f]) 
-    e0 = strain[-1]                 # 次のODE計算のために初期条件e0を更新
+    sol = odeint(SLS1_sinuStrain, s0, t - t_start, args=(eamp,af,insMod,k,tau)) # ODEの解
+    stress_f = sol[:, 0]            # 応力履歴
+    stress = np.concatenate([stress, stress_f]) 
+    s0 = stress[-1]                 # 次のODE計算のために初期条件e0を更新
     # 位相差の計算
-    strain_latter = strain_f[int(0.4*len(strain_f)):]     # 後半部分を抽出（前半は過渡応答を含むから）
     stress_latter = stress_f[int(0.4*len(stress_f)):]     # 後半部分を抽出（前半は過渡応答を含むから）
-    eamp = np.max(strain_latter)
-    eamp_list.append(eamp)
-    ind = getNearestIndex2value(strain_latter,0)          # 出力信号が0になるindexを抽出           
-    pdiff = (180/np.pi)*np.arcsin(np.abs(stress_latter[ind])/samp)
+    strain_latter = strain_f[int(0.4*len(strain_f)):]     # 後半部分を抽出（前半は過渡応答を含むから）
+    samp = np.max(stress_latter)
+    samp_list.append(samp)
+    ind = getNearestIndex2value(stress_latter,0)          # 出力信号が0になるindexを抽出           
+    pdiff = (180/np.pi)*np.arcsin(np.abs(strain_latter[ind])/eamp)
     pdiff_list.append(pdiff)
 #    print(samp, pdiff)
     t_start = t[-1]
 
 # 描画のためのスケーリング
-eamp_array = np.array(eamp_list)/1.0
-eamp_max = np.max(eamp_array)
+samp_array = np.array(samp_list)/10**6
+samp_max = np.max(samp_array)
 pdiff_array = np.array(pdiff_list)
 
-# J', J"の計算
+# E', E"の計算
 '''
-J' = eamp*cos(theta)/samp
-J" = eamp*sin(theta)/samp
+E' = samp*cos(theta)/eamp
+E" = samp*sin(theta)/eame
 '''
 
 cos_pdiff = np.cos(np.radians(pdiff_array))
 sin_pdiff = np.sin(np.radians(pdiff_array))
-strComp = eamp_array * cos_pdiff / samp
-losComp = eamp_array * sin_pdiff / samp
+strMod = samp_array * cos_pdiff / eamp
+losMod = samp_array * sin_pdiff / eamp
 
 if axisoption == "-log":
-    strComp = strComp
-    losComp = losComp
+    strMod = strMod
+    losMod = losMod
 else:
-    strComp = strComp * 10**6
-    losComp = losComp * 10**6
+    strMod = strMod
+    losMod = losMod
 
 fig = plt.figure(figsize=(8,5), tight_layout=True)
 ax1 = fig.add_subplot(111)
 ax2 = ax1.twinx()
 ax2.grid(ls='dotted')
-title_text = "SLS I model: sinusoidal stress (frequecy sweep)"
+title_text = "SLS I model: sinusoidal strain (frequecy sweep)"
 ax1.set_title(title_text)
 ax1.set_axisbelow(True)
 ax1.set_xscale('log')
 ax1.set_xlabel(r'$\omega\tau$')
 
-var_text = r'$\sigma_{{amp}}$ = {0:.2f} MPa, $E_1$ = {1:.1f} MPa, $E_2$ = {2:.1f} MPa, $\eta$ = {3:.1f} kPa s'.format(samp/10**6,E1/10**6,E2/10**6,eta/10**3)
-eq_text = r'd$\epsilon$/d$t$ = ($k$$\sigma$/$E_i$ + $\tau$/$E_i$ d$\sigma$/d$t$ - $\epsilon$)/$\tau$'
-res_text = r'$\tau$ = {0:.2f} s'.format(tau)
+var_text = r'$\epsilon_{{amp}}$ = {0:.2f}, $E_1$ = {1:.1f} MPa, $E_2$ = {2:.1f} MPa, $\eta$ = {3:.1f} kPa s'.format(eamp,E1/10**6,E2/10**6,eta/10**3)
+eq_text = r'd$\sigma$/d$t$ = ($E_i$$\epsilon$ + $E_i$$\tau$ d$\epsilon$/d$t$ - $k$$\sigma$)/$\tau$'
+res_text = r'$\tau$ = {0:.1f} s'.format(tau)
 
 if axisoption == "-log":
-    ax1.set_ylim(10**(-8), 10**(-5))
-    ax1.set_ylabel(r'storage compliance, $J^{{\prime}}$ /Pa$^{{-1}}$')
-    ax2.set_ylim(10**(-8), 10**(-5))
-    ax2.set_ylabel(r'loss compliance, $J^{{\prime\prime}}$ /$^{{-1}}$')
+    ax1.set_ylim(10**3, 10**7)
+    ax1.set_ylabel(r'storage modulus, $E^{{\prime}}$ /Pa')
+    ax2.set_ylim(10**3, 10**7)
+    ax2.set_ylabel(r'loss modulus, $E^{{\prime\prime}}$ /Pa')
     ax1.set_yscale('log')
     ax2.set_yscale('log')
-    ax1.text(0.15, 0.3, var_text, transform=ax1.transAxes)
-    ax1.text(0.15, 0.2, eq_text, transform=ax1.transAxes)
-    ax2.text(0.15, 0.1, res_text, transform=ax2.transAxes)
+    ax1.text(0.1, 0.3, var_text, transform=ax1.transAxes)
+    ax1.text(0.1, 0.2, eq_text, transform=ax1.transAxes)
+    ax2.text(0.1, 0.1, res_text, transform=ax2.transAxes)
 else:
-    ax1.set_ylim(-0.05*np.max(strComp), 1.2*np.max(strComp))
-    ax1.set_ylabel(r'storage compliance, $J^{{\prime}}$ /MPa$^{{-1}}$')
-    ax2.set_ylim(-0.05*np.max(strComp), 1.2*np.max(strComp))
-    ax2.set_ylabel(r'loss compliance, $J^{{\prime\prime}}$ /MPa$^{{-1}}$')
-    ax1.text(0.4, 0.8, var_text, transform=ax1.transAxes)
-    ax1.text(0.4, 0.7, eq_text, transform=ax1.transAxes)
-    ax2.text(0.4, 0.6, res_text, transform=ax2.transAxes)
+    ax1.set_ylim(-0.05*np.max(strMod), 1.2*np.max(strMod))
+    ax1.set_ylabel(r'storage modulus, $E^{{\prime}}$ /MPa')
+    ax2.set_ylim(-0.05*np.max(strMod), 1.2*np.max(strMod))
+    ax2.set_ylabel(r'loss modulus, $E^{{\prime\prime}}$ /MPa')
+    ax1.text(0.15, 0.8, var_text, transform=ax1.transAxes)
+    ax1.text(0.15, 0.7, eq_text, transform=ax1.transAxes)
+    ax2.text(0.15, 0.6, res_text, transform=ax2.transAxes)
 
-ax1.plot(aft_array,strComp, 'ro-', label=r'$J^{{\prime}}$')
-ax2.plot(aft_array,losComp, 'bo-', label=r'$J^{{\prime\prime}}$')
+ax1.plot(aft_array,strMod, 'ro-', label=r'$E^{{\prime}}$')
+ax2.plot(aft_array,losMod, 'bo-', label=r'$E^{{\prime\prime}}$')
 
 h1, l1 = ax1.get_legend_handles_labels()
 h2, l2 = ax2.get_legend_handles_labels()
 ax1.legend(h1 + h2, l1 + l2)
 
 if axisoption == "-log":
-    savefile = "./png/SLS1_sinuStress_dynamicCompliance(log)_(tau={0:.1f}s).png".format(tau)
+    savefile = "./png/SLS1_sinuStrain_dynamicModuli(log)_(tau={0:.1f}s).png".format(tau)
 else:
-    savefile = "./png/SLS1_sinuStress_dynamicCompliance(linear)_(tau={0:.1f}s).png".format(tau)
+    savefile = "./png/SLS1_sinuStrain_dynamicModuli(linear)_(tau={0:.1f}s).png".format(tau)
 
 fig.savefig(savefile, dpi=300)
 
