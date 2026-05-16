@@ -73,7 +73,7 @@ t_post = t[t >= event_time]
 stress_post = samp*np.sin(af*t)  # 振動応力の関数
 stress = np.where(t - event_time >= 0, stress_post, 0)
 
-# solution of ODE
+# ODEの解析
 e0 = 0                              # 初期条件として定義
 sol = odeint(SLS1_sinuStress, e0, t_post, args=(samp,af,insMod,k,tau))
 strain_pre = np.zeros_like(t_pre)   # ステップ前の応力はゼロ
