@@ -28,9 +28,9 @@ def reqParams():
     except ValueError:
         E2 = 2*10**5                # [Pa] modulus
     try:
-        eta = float(input('viscosity [kPa s] (default = 500.0 kPa s): '))*10**3
+        eta = float(input('viscosity [kPa s] (default = 100.0 kPa s): '))*10**3
     except ValueError:
-        eta = 5*10**5               # [Pa s] viscosity
+        eta = 10**5               # [Pa s] viscosity
 
     insMod = E1                     # [Pa] instantaneous modulus
     infMod = E1*E2/(E1+E2)          # [Pa] equilibrium modulus
@@ -41,7 +41,7 @@ def reqParams():
 
 def freqAxis(retardTime):
     centerAngFreq = 1 / retardTime
-    angFreq = np.logspace(int(np.log10(centerAngFreq))-2.5, int(np.log10(centerAngFreq))+1.5, 51)
+    angFreq = np.logspace(int(np.log10(centerAngFreq))-1.5, int(np.log10(centerAngFreq))+2.5, 51)
     scaledAngFreq = angFreq*retardTime
     freqAxes = [angFreq, scaledAngFreq]
     return freqAxes
@@ -56,9 +56,9 @@ def fitAngFreqs():
     except ValueError:
          maxAngFreq_s = 0.5
     try:
-        minAngFreq_l = float(input('Enter minimum angular frequency for fitting (loss) (default = 1.0): '))
+        minAngFreq_l = float(input('Enter minimum angular frequency for fitting (loss) (default = 1.2): '))
     except ValueError:
-        minAngFreq_l = 1.0
+        minAngFreq_l = 1.2
     try:
         maxAngFreq_l = float(input('Enter maximum angular frequency for fitting (loss) (default = 1.8): '))
     except ValueError:
