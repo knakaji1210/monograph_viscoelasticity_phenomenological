@@ -121,8 +121,6 @@ for freq in freq_list:
     strain_f = sol[:, 0]            # 応力履歴
     strain = np.concatenate([strain, strain_f]) 
     e0 = strain[-1]                 # 次のODE計算のために初期条件e0を更新
-    dedt_f = np.gradient(strain_f, t)
-    dedt = np.concatenate([dedt, dedt_f]) 
     # 位相差の計算
     strain_latter = strain_f[int(0.4*len(strain_f)):]     # 後半部分を抽出（前半は過渡応答を含むから）
     stress_latter = stress_f[int(0.4*len(stress_f)):]     # 後半部分を抽出（前半は過渡応答を含むから）
