@@ -28,7 +28,7 @@ infMod = E1*E2/(E1+E2)      # [Pa] 緩和弾性率
 k = insMod/infMod
 tau = eta/E2                # [s] 緩和時間
 
-# 振動歪みの設定
+# 振動応力の設定
 try:
     samp = float(input('amplitude for sinusoidal stress [MPa] (default=0.02): '))*10**6
 except ValueError:
