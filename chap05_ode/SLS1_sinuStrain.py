@@ -62,8 +62,8 @@ event_time = 0.0    # ステップ歪みを加える時刻
 time_duration = end_time - start_time       # [s] 継続時間
 time_duration_pre = event_time - start_time # [s] ステップ前の継続時間
 time_duration_post = end_time - event_time  # [s] ステップ後の継続時間
-fps = 500            # 1秒あたりのフレーム数、30だと足りないので60に変更
-# 高周波の場合はfps=500とかしないといけない
+fps = 60            # 1秒あたりのフレーム数、30だと足りないので60に変更
+#fps = 500           # 高周波の場合はfps=500とかしないといけない
 steps = int(time_duration * fps) + 1        # 総フレーム数
 interval_ms = 1000 / fps                    # 1コマあたりのミリ秒
 t = np.linspace(start_time, end_time, steps)
