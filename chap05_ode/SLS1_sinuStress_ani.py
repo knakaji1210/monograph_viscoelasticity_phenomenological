@@ -254,4 +254,3 @@ ani.save(savefile, writer='ffmpeg', fps=fps, extra_args=['-r', '30'])
 
 plt.tight_layout()
 plt.show()
-plt.show()
