@@ -97,7 +97,7 @@ if __name__=='__main__':
     compStress = calc_compStress(compStrain, comMod)
     stress = np.real(compStress)
     restext = r'$\sigma_{{amp}}$ = {0:.3f} MPa'.format(np.max(stress/10**6))
-    stress /= 10**6             # rescale to MPa    
+    stress /= 10**6            # rescale to MPa    
     param_text = r'($E^\prime$ = {0:.2f} MPa, $E^{{\prime\prime}}$ = {1:.2f} MPa)'.format(comMod.real/10**6,comMod.imag/10**6)
     
     fig = plt.figure(tight_layout=True)
