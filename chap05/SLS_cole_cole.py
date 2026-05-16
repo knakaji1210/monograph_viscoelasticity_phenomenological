@@ -1,4 +1,4 @@
-# Cole-Cole plot for SLS model 1
+# Cole-Cole plot (SLS I & SLS II)
 import numpy as np
 import matplotlib.pyplot as plt
 
