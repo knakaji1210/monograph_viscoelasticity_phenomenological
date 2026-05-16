@@ -48,19 +48,19 @@ def freqAxis(retardTime):
 
 def fitAngFreqs():
     try:
-        minAngFreq_s = float(input('Enter minimum frequency for fitting (storage) (default = 0.0): '))
+        minAngFreq_s = float(input('Enter minimum angular frequency for fitting (storage) (default = 0.0): '))
     except ValueError:
         minAngFreq_s = 0.0
     try:
-        maxAngFreq_s = float(input('Enter maximum frequency for fitting (storage) (default = 0.5): '))
+        maxAngFreq_s = float(input('Enter maximum angular frequency for fitting (storage) (default = 0.5): '))
     except ValueError:
          maxAngFreq_s = 0.5
     try:
-        minAngFreq_l = float(input('Enter minimum frequency for fitting (loss) (default = 1.0): '))
+        minAngFreq_l = float(input('Enter minimum angular frequency for fitting (loss) (default = 1.0): '))
     except ValueError:
         minAngFreq_l = 1.0
     try:
-        maxAngFreq_l = float(input('Enter maximum frequency for fitting (loss) (default = 1.8): '))
+        maxAngFreq_l = float(input('Enter maximum angular frequency for fitting (loss) (default = 1.8): '))
     except ValueError:
          maxAngFreq_l = 1.8
     fitAngFreqs = [minAngFreq_s, maxAngFreq_s, minAngFreq_l, maxAngFreq_l]
