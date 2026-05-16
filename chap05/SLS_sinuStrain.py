@@ -5,9 +5,9 @@ import matplotlib.pyplot as plt
 
 def reqParams():
     try:
-        freq = float(input('Enter frequency value (Hz) (default = 0.3183 Hz ): '))
+        freq = float(input('Enter frequency value (Hz) (default = 1.91 Hz ): '))
     except ValueError:
-        freq = 0.3183
+        freq = 6 / np.pi
     angFreq = 2*np.pi*freq
     try:
         strain_amp = float(input('strain amplitute [] (default = 0.1): '))
