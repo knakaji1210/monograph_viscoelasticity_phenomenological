@@ -1,4 +1,5 @@
 # Cole-Cole plot (SLS I & SLS II)
+
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -14,7 +15,7 @@ def reqParams(model):
         E2 = float(input('modulus 2 [MPa] (default = 0.2 MPa): '))*10**6
     except ValueError:
         E2 = 2*10**5                # [Pa] 弾性率
-    if model == 0:
+    if model == 1:                  # SLS I
         # 複素弾性率の計算
         insMod = E1                 # [Pa] 瞬間弾性率
         infMod = E1*E2/(E1+E2)      # [Pa] 緩和弾性率
@@ -27,7 +28,7 @@ def reqParams(model):
         modeltext = r'SLS I model '
         savefile = './png/SLS1_cole_cole.png'
 
-    if model == 1:
+    elif model == 2:                # SLS II
         # 複素弾性率の計算
         insMod = E1+E2              # [Pa] 瞬間弾性率
         infMod = E2                 # [Pa] 緩和弾性率
@@ -44,20 +45,20 @@ def reqParams(model):
 
 if __name__=='__main__':
     try:
-        model = int(input('Selection (SLS I : 0, SLS II: 1): '))
+        model = int(input('Selection (SLS I : 1, SLS II: 2): '))
     except ValueError:
-        model = 0    
+        model = 1    
     k, insMod, infMod, comMod, x_label, y_label, modeltext, savefile = reqParams(model)    
     param_text = '($k$ = {0})'.format(k)
 
-    if model == 0:
+    if model == 1:
         comComp = 1 / comMod
         strComp = comComp.real
         losComp = -comComp.imag
         x = strComp * insMod
         y = losComp * insMod
 
-    elif model == 1:
+    elif model == 2:
         strMod = comMod.real
         losMod = comMod.imag
         x = strMod / insMod
