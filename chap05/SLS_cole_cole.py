@@ -2,7 +2,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-def reqParams(select):
+def reqParams(model):
     xi_min, xi_max = -2, 2
     xi = np.logspace(xi_min, xi_max, 200)
     # 変数の設定
@@ -14,7 +14,7 @@ def reqParams(select):
         E2 = float(input('modulus 2 [MPa] (default = 0.2 MPa): '))*10**6
     except ValueError:
         E2 = 2*10**5                # [Pa] 弾性率
-    if select == 0:
+    if model == 0:
         # 複素弾性率の計算
         insMod = E1                 # [Pa] 瞬間弾性率
         infMod = E1*E2/(E1+E2)      # [Pa] 緩和弾性率
@@ -27,7 +27,7 @@ def reqParams(select):
         modeltext = r'SLS I model '
         savefile = './png/SLS1_cole_cole.png'
 
-    if select == 1:
+    if model == 1:
         # 複素弾性率の計算
         insMod = E1+E2              # [Pa] 瞬間弾性率
         infMod = E2                 # [Pa] 緩和弾性率
@@ -44,20 +44,20 @@ def reqParams(select):
 
 if __name__=='__main__':
     try:
-        select = int(input('Selection (SLS I : 0, SLS II: 1): '))
+        model = int(input('Selection (SLS I : 0, SLS II: 1): '))
     except ValueError:
-        select = 0    
-    k, insMod, infMod, comMod, x_label, y_label, modeltext, savefile = reqParams(select)    
+        model = 0    
+    k, insMod, infMod, comMod, x_label, y_label, modeltext, savefile = reqParams(model)    
     param_text = '($k$ = {0})'.format(k)
 
-    if select == 0:
+    if model == 0:
         comComp = 1 / comMod
         strComp = comComp.real
         losComp = -comComp.imag
         x = strComp * insMod
         y = losComp * insMod
 
-    elif select == 1:
+    elif model == 1:
         strMod = comMod.real
         losMod = comMod.imag
         x = strMod / insMod
