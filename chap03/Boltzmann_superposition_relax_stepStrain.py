@@ -11,7 +11,7 @@ def relaxation_modulus(t_elapsed, E_inf, E_i, tau):
 # 1. データ準備
 strain_i = 1.0  # ステップ歪みの大きさ
 start_time = -2.0  # 開始時間
-end_time = 8.0    # 終了時間
+end_time = 8.0     # 終了時間
 time_duration = end_time - start_time  # [s]
 fps = 30
 steps = int(time_duration * fps) + 1
@@ -37,7 +37,8 @@ ax1.set_ylabel('Applied Strain, $\epsilon$ /')
 ax1.set_title('Boltzmann Superposition (Strees Relaxation) ($E_i$ = {0:.1f} MPa, $E_\\infty$ = {1:.1f} MPa, $\\tau$ = {2:.1f} s)'.format(E_i, E_inf, tau))
 
 ax1.grid(True, ls='--')
-line_strain, = ax1.step([], [], where='post', color='blue', lw=2)
+line_strain, = ax1.step([], [], where='post', color='blue', lw=2, label='Two-step strain (t = {0:.1f} s)'.format(t1))
+ax1.legend(loc='upper right')
 
 # --- 下段：応力 (Response) ---
 ax2.set_xlim(start_time, end_time)
@@ -46,9 +47,9 @@ ax2.set_xlabel('Time /s')
 ax2.set_ylabel('Stress, $\sigma$ /MPa')
 ax2.grid(True, ls='--')
 
+line_total, = ax2.plot([], [], 'r-', lw=2.5, label='Total Stress (Sum)')
 line_s1, = ax2.plot([], [], 'y--', alpha=0.5, label='Response to Step 1 (t = {0:.1f} s)'.format(t1))
 line_s2, = ax2.plot([], [], 'g--', alpha=0.5, label='Response to Step 2 (t = {0:.1f} s)'.format(t2))
-line_total, = ax2.plot([], [], 'r-', lw=2.5, label='Total Stress (Sum)')
 ax2.legend(loc='upper right')
 
 # 3. アニメーション更新関数
@@ -57,10 +58,10 @@ def animate(i):
     line_strain.set_data(t[:i], strain[:i])
     
     # 応力データの更新
+    line_total.set_data(t[:i], stress_total[:i])
     line_s1.set_data(t[:i], stress1[:i])
     line_s2.set_data(t[:i], stress2[:i])
-    line_total.set_data(t[:i], stress_total[:i])
-    return line_strain, line_s1, line_s2, line_total
+    return line_strain, line_total, line_s1, line_s2
 
 # アニメーション実行
 ani = animation.FuncAnimation(fig, animate, frames=steps, interval=interval_ms, blit=True)

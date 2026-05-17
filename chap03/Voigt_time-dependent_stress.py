@@ -75,10 +75,10 @@ if __name__=='__main__':
     ax1.set_ylim(0, c*t1*1.2)
     ax1.grid()
     ax1.set_axisbelow(True)
-    ax1.plot(tim1, stress1, c='r', lw=2)
+    ax1.plot(tim1, stress1, c='r', lw=2, label='Time-dependent stress')
     ax1.plot(tim2, stress2, c='r', lw=2)
     ax1.plot(tim3, stress3, c='r', lw=2)
-
+    ax1.legend(loc='upper right')
 
     ax2 = fig.add_subplot(212)
     ax2.set_xlabel(r'$t$ /ms')
@@ -87,9 +87,10 @@ if __name__=='__main__':
     ax2.set_ylim(0, np.max(strain)*1.2)
     ax2.grid()
     ax2.set_axisbelow(True)
-    ax2.plot(tim1, strain1, c='b', lw=2)
+    ax2.plot(tim1, strain1, c='b', lw=2, label='Response to time-dependent stress')
     ax2.plot(tim2, strain2, c='b', lw=2)
     ax2.plot(tim3, strain3, c='b', lw=2)
+    ax2.legend(loc='upper right')
 
     savefile = './png/Voigt_time-dependent_strain_(tau={0:.1f}ms).png'.format(T*10**3)
     fig.savefig(savefile, dpi=300)

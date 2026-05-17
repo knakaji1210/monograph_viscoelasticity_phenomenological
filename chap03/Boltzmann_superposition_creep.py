@@ -36,7 +36,8 @@ ax1.set_ylim(-0.2, 2.5) # 縦軸固定
 ax1.set_ylabel('Applied Stress, $\sigma$ /MPa')
 ax1.set_title('Boltzmann Superposition (Creep) ($J_0$ = {0:.1f} MPa$^{{-1}}$, $J_\\infty$ = {1:.1f} MPa$^{{-1}}$, $\\tau$ = {2:.1f} s)'.format(J0, J_inf, tau))
 ax1.grid(True, ls='--')
-line_stress, = ax1.step([], [], where='post', color='red', lw=2)
+line_stress, = ax1.step([], [], where='post', color='red', lw=2, label='Two-step stress (t = {0:.1f} s)'.format(t1))
+ax1.legend(loc='upper right')
 
 # --- 下段：歪み (Response) ---
 ax2.set_xlim(start_time, end_time)
@@ -45,9 +46,9 @@ ax2.set_xlabel('Time /s')
 ax2.set_ylabel('Strain, $\epsilon$ /')
 ax2.grid(True, ls='--')
 
+line_total, = ax2.plot([], [], 'b-', lw=2.5, label='Total Strain (Sum)')
 line_str1, = ax2.plot([], [], 'g--', alpha=0.5, label='Response to Step 1 (t = {0:.1f} s)'.format(t1))
 line_str2, = ax2.plot([], [], 'y--', alpha=0.5, label='Response to Step 1 (t = {0:.1f} s)'.format(t2))
-line_total, = ax2.plot([], [], 'b-', lw=2.5, label='Total Strain (Sum)')
 ax2.legend(loc='upper left')
 
 # 3. アニメーション更新関数
@@ -59,7 +60,7 @@ def animate(i):
     line_str1.set_data(t[:i], strain1[:i])
     line_str2.set_data(t[:i], strain2[:i])
     line_total.set_data(t[:i], strain_total[:i])
-    return line_stress, line_str1, line_str2, line_total
+    return line_stress, line_total, line_str1, line_str2
 
 # アニメーション実行
 ani = animation.FuncAnimation(fig, animate, frames=steps, interval=interval_ms, blit=True)

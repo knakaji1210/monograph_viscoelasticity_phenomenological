@@ -36,7 +36,8 @@ ax1.set_ylim(-0.2, 1.5)
 ax1.set_ylabel('Applied Strain, $\epsilon$ /')
 ax1.set_title('Boltzmann Superposition (Strees Relaxation) ($E_i$ = {0:.1f} MPa, $E_\\infty$ = {1:.1f} MPa, $\\tau$ = {2:.1f} s)'.format(E_i, E_inf, tau))
 ax1.grid(True, ls='--')
-line_strain, = ax1.step([], [], where='post', color='blue', lw=2)
+line_strain, = ax1.step([], [], where='post', color='blue', lw=2, label='Pulse strain (t = {0:.1f} s)'.format(t_on))
+ax1.legend(loc='upper right')
 
 ax2.set_xlim(start_time, end_time)
 ax2.set_ylim(-4.5, 4.5)
@@ -44,9 +45,9 @@ ax2.set_xlabel('Time /s')
 ax2.set_ylabel('Stress, $\sigma$ /MPa')
 ax2.grid(True, ls='--')
 
+line_total, = ax2.plot([], [], 'r-', lw=2.5, label='Total Stress (Sum)')
 line_s_on, = ax2.plot([], [], 'y--', alpha=0.5, label='Response to Loading  (t = {0:.1f} s)'.format(t_on))
 line_s_off, = ax2.plot([], [], 'g--', alpha=0.5, label='Response to Unloading (t = {0:.1f} s)'.format(t_off))
-line_total, = ax2.plot([], [], 'r-', lw=2.5, label='Total Stress (Sum)')
 ax2.legend(loc='upper right')
 
 # 3. 更新関数
@@ -54,10 +55,10 @@ def animate(i):
     # 歪みデータの更新(t_onで1になり、t_offで0に戻る)
     line_strain.set_data(t[:i], strain[:i])
     
+    line_total.set_data(t[:i], stress_total[:i])
     line_s_on.set_data(t[:i], stress_on[:i])
     line_s_off.set_data(t[:i], stress_off[:i])
-    line_total.set_data(t[:i], stress_total[:i])
-    return line_strain, line_s_on, line_s_off, line_total
+    return line_strain, line_total, line_s_on, line_s_off
 
 # アニメーション実行
 ani = animation.FuncAnimation(fig, animate, frames=steps, interval=interval_ms, blit=True)
