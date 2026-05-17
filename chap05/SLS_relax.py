@@ -31,7 +31,7 @@ def reqParams(model):
         res_text = r'$E_i$ = {0:.2f} MPa, $E_\infty$ = {1:.2f} MPa, $\tau$ = {2:.2f} s, $\tau$ / $k$ = {3:.2f} s'.format(insMod/10**6, infMod/10**6, relaxTime, relaxTime/k)
 
     elif model == 2:                # SLS II
-        # 複素弾性率の計算
+        # パラメータの計算
         insMod = E1+E2              # [Pa] 瞬間弾性率
         infMod = E2                 # [Pa] 緩和弾性率
         relaxTime = eta/E1          # [s] 緩和時間
