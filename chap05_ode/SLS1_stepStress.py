@@ -57,7 +57,7 @@ t_post = t[t >= event_time]
 
 stress = np.where(t - event_time >= 0, stress_i, 0)
 
-# solution of ODE
+# ODEの解析
 s0 = stress_i   # ODEの引数として入れるためにこの形で定義
 e0 = s0/E1      # ステップ応力を加えた直後の歪みはspring1の歪みのみであるため、初期条件として定義
 sol = odeint(SLS1_stepStress, e0, t_post, args=(s0,infMod,tau))
