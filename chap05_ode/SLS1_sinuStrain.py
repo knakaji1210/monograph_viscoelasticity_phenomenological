@@ -107,7 +107,7 @@ ax1.set_ylabel('Applied strain, $\epsilon$ /')
 ax1.set_title("SLS I model: sinusoidal strain")
 ax1.grid(True, ls='--')
 
-line_strain, = ax1.plot([], [], color='blue', lw=2, label='Response to step strain')
+line_strain, = ax1.plot([], [], color='blue', lw=2, label='Sinusoidal strain')
 line_strain_e1, = ax1.plot([], [], color='cyan', ls="dashed", lw=1, label='$\epsilon$ (spring 1)')
 line_strain_e2, = ax1.plot([], [], color='gray', ls="dashed", lw=1, label='$\epsilon$ (Voigt)')
 ax1.legend(loc='upper right')
@@ -119,10 +119,10 @@ ax2.set_xlabel('$t$ /s')
 ax2.set_ylabel('Stress, $\sigma$ /MPa')
 ax2.grid(True, ls='--')
 
-line_stress, = ax2.plot([], [], color='red', lw=2, label='Step stress (t = {0:.1f} s)'.format(event_time))
+line_stress, = ax2.plot([], [], color='red', lw=2, label='Response to sinusoidal strain (t = {0:.1f} s)'.format(event_time))
 line_stress_s1, = ax2.plot([], [], color='green', ls="dashed", lw=1, label='$\sigma$ (spring 2 in Voigt)')
 line_stress_s2, = ax2.plot([], [], color='orange', ls="dashed", lw=1, label='$\sigma$ (dashpot in Voigt)')
-ax2.legend(loc='upper right')
+ax2.legend(loc='lower right')
 
 # テキスト描画
 var_text = r'$\epsilon_{{amp}}$ = {0:.2f}, $E_1$ = {1:.1f} MPa, $E_2$ = {2:.1f} MPa, $\eta$ = {3:.1f} kPa s'.format(eamp,E1/10**6,E2/10**6,eta/10**3)

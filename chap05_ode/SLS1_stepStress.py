@@ -96,7 +96,7 @@ ax2.set_xlabel('$t$ /s')
 ax2.set_ylabel('Strain, $\epsilon$ /')
 ax2.grid(True, ls='--')
 
-line_strain, = ax2.plot([], [], color='blue', lw=2, label='Response to step strain')
+line_strain, = ax2.plot([], [], color='blue', lw=2, label='Response to step stress')
 line_strain_e1, = ax2.plot([], [], color='cyan', ls="dashed", lw=1, label='$\epsilon$ (spring 1)')
 line_strain_e2, = ax2.plot([], [], color='gray', ls="dashed", lw=1, label='$\epsilon$ (Voigt)')
 ax2.legend(loc='upper right')
