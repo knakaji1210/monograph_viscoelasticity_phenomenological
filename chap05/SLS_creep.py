@@ -1,4 +1,4 @@
-# relaxation modulus (SLS I & SLS II)
+# creep compliance (SLS I & SLS II)
 
 import numpy as np
 from scipy.optimize import curve_fit
@@ -23,52 +23,49 @@ def reqParams(model):
         # パラメータの計算
         insMod = E1                 # [Pa] 瞬間弾性率
         infMod = E1*E2/(E1+E2)      # [Pa] 緩和弾性率
-        relaxTime = eta/E2          # [s] 緩和時間
+        retardTime = eta/E2          # [s] 緩和時間
         k = insMod/infMod
-        idx_x = 1/k
+        idx_x = 1
         model_text = r'SLS I model '
         save_text = r'SLS1_'
-        res_text = r'$E_i$ = {0:.2f} MPa, $E_\infty$ = {1:.2f} MPa, $\tau$ = {2:.2f} s, $t_{{1/e}}$/$\tau$ = {3:.2f}'.format(insMod/10**6, infMod/10**6, relaxTime, idx_x)
 
     elif model == 2:                # SLS II
         # パラメータの計算
         insMod = E1+E2              # [Pa] 瞬間弾性率
         infMod = E2                 # [Pa] 緩和弾性率
-        relaxTime = eta/E1          # [s] 緩和時間
+        retardTime = eta/E1          # [s] 緩和時間
         k = insMod/infMod
-        idx_x = 1
+        idx_x = k
         model_text = r'SLS II model '
         save_text = r'SLS2_'
-        res_text = r'$E_i$ = {0:.2f} MPa, $E_\infty$ = {1:.2f} MPa, $\tau$ = {2:.2f} s, $t_{{1/e}}$/$\tau$ = {3:.2f}'.format(insMod/10**6, infMod/10**6, relaxTime, idx_x)
 
-    return E1, E2, eta, insMod, infMod, relaxTime, k, idx_x, model_text, save_text, res_text
+    return E1, E2, eta, insMod, infMod, retardTime, k, idx_x, model_text, save_text
 
-def relaxMod(model, E, k, tau, t_elapsed):
+def creepComp(model, E, k, tau, t_elapsed):
     if model == 1:
-        relaxMod = np.where(t_elapsed >= 0, E*(1/k + (1 - 1/k)*np.exp(-k*t_elapsed/tau)), 0)
-        # E must be insMod
+        creepComp = np.where(t_elapsed >= 0, (1 - (1 - 1/k)*np.exp(-t_elapsed/tau))/E, 0)
+        # E must be infMod
     elif model == 2:
-        relaxMod = np.where(t_elapsed >= 0, E*(1/k + (1 - 1/k)*np.exp(-t_elapsed/tau)), 0)
-        # E must be insMod
-    return relaxMod
+        creepComp = np.where(t_elapsed >= 0, (1 - (1 - 1/k)*np.exp(-t_elapsed/(k*tau)))/E, 0)
+        # E must be infMod
+    return creepComp
 
-def relaxFunc(model, k, tau, t_elapsed):
+def creepFunc(model, k, tau, t_elapsed):
     if model == 1:
-        relaxFunc = np.where(t_elapsed >= 0, (1 - 1/k)*(1 - np.exp(-k*t_elapsed/tau)), 0)
-    elif model == 2:
-        relaxFunc = np.where(t_elapsed >= 0, (1 - 1/k)*(1 - np.exp(-t_elapsed/tau)), 0)
-    return relaxFunc
-
+        creepFunc = np.where(t_elapsed >= 0, -1 + k*(1 - (1 - 1/k)*np.exp(-t_elapsed/tau)), 0)
+    if model == 2:
+        creepFunc = np.where(t_elapsed >= 0, (k - 1)*(1 - np.exp(-t_elapsed/(k*tau))), 0)
+    return creepFunc
 
 def timeAxis(retardTime, model, k):
-    log_relaxT = np.log10(retardTime)
+    log_retardT = np.log10(retardTime)
     if model == 1:
-        linearTime = np.linspace(-retardTime*0.5/k, retardTime*3/k, 400)
-        logTime = np.logspace(log_relaxT-2.5, log_relaxT+1.5, 400)
-    if model == 2:
         linearTime = np.linspace(-retardTime*0.5, retardTime*3, 400)
-        logTime = np.logspace(log_relaxT-2.0, log_relaxT+3.0, 400)
-    scaledLinearTime = linearTime/retardTime    
+        logTime = np.logspace(log_retardT-2.0, log_retardT+2.0, 400)
+    if model == 2:
+        linearTime = np.linspace(-retardTime*0.5, retardTime*3*k, 400)
+        logTime = np.logspace(log_retardT-2.0, log_retardT+3.0, 400)
+    scaledLinearTime = linearTime/retardTime
     scaledLogTime = np.log10(logTime/retardTime)
     return linearTime, scaledLinearTime, logTime, scaledLogTime
 
@@ -78,9 +75,9 @@ def fitTimes():
     except ValueError:
         minTime = -2.0
     try:
-        maxTime = float(input('Enter maximum time for fitting in log scale (default = -1.5): '))
+        maxTime = float(input('Enter maximum time for fitting in log scale (default = -1.0): '))
     except ValueError:
-         maxTime = -1.5
+         maxTime = -1.0
     fitTimes = [minTime, maxTime]
     return fitTimes
 
@@ -112,13 +109,14 @@ if __name__=='__main__':
     try:
         model = int(input('Selection (SLS I : 1, SLS II: 2): '))
     except ValueError:
-        model = 1    
-    # calculating relaxation modulus and relaxation funcion
-    E1, E2, eta, insMod, infMod, relaxTime, k, idx_x, model_text, save_text, res_text = reqParams(model)
+        model = 1  
+    # calculating creep compliance and creep funcion
+    E1, E2, eta, insMod, infMod, retardTime, k, idx_x, model_text, save_text = reqParams(model)
     param_text = r'($E_1$ = {0:.1f} MPa, $E_2$ = {1:.1f} MPa, $\eta$ = {2:.1f} kPa s)'.format(E1/10**6, E2/10**6, eta/10**3)
-    timeAxis = timeAxis(relaxTime, model, k)
+    res_text = r'$E_i$ = {0:.2f} MPa, $E_\infty$ = {1:.2f} MPa, $\tau$ = {2:.2f} s, $t_{{1/e}}$/$\tau$ = {3:.2f}'.format(insMod/10**6, infMod/10**6, retardTime, idx_x)
+    timeAxis = timeAxis(retardTime, model, k)
     try:
-        select = int(input('Selection (relaxation modulus: 0, relaxation function: 1): '))
+        select = int(input('Selection (creep compliance: 0, creep function: 1): '))
     except ValueError:
         select = 0
 
@@ -137,45 +135,45 @@ if __name__=='__main__':
     x2_label = r'log[$t$/$\tau$]'
 
     if select == 0:
-        y1 = relaxMod(model, insMod, k, relaxTime, x1)  # E = insMod
-        y1 /= 10**6             # rescale to MPa
-        y1_label = r'$E$($t$) /MPa'
-        label1 = r'Rleaxtion modulus (linear)'
-        relaxMod = relaxMod(model, insMod, k, relaxTime, x2)
-        y2 = np.log10(relaxMod)                 # creepCompの出力をnp.ndarrayに変更したのでこのように簡単に書ける
-        y2_label = r'log[ $E(t)$ /Pa]'
+        y1 = creepComp(model, infMod, k, retardTime, x1)
+        y1 *= 10**6             # rescale to MPa
+        y1_label = r'$J$($t$) /MPa$^{{-1}}$'
+        label1 = r'Creep compliance (linear)'
+        creepComp = creepComp(model, infMod, k, retardTime, x2)
+        y2 = np.log10(creepComp)                 # creepCompの出力をnp.ndarrayに変更したのでこのように簡単に書ける
+        y2_label = r'log[ $J$($t$) /Pa$^{{-1}}$]'
         y_lim = [np.min(y2)-0.2, np.max(y2)+0.2]
-        label2 = r'Relaxation modulus (log)'
-        res_pos = [0.2, 0.85]
-        if fitting == 1:
-            pass
-        elif fitting == 0:
-            fitTimes = fitTimes()
-            y_fit, param = curveFit(x2_scaled, y2, fitTimes)        
-            fit_result = r'$E(t) \propto (t/\tau)^{{{0:.2f}}}$'.format(param[0])
-            label_fit = r'Fitted relaxation time'
-        legend_loc='upper right'
-        savefile = './png/'+save_text+'relaxation modulus.png'
-
-    elif select == 1:
-        y1 = relaxFunc(model, k, relaxTime, x1)
-        y1_label = r'$\phi$($t$)'
-        label1 = 'Relaxation function (linear)'
-        relaxFunc = relaxFunc(model, k, relaxTime, x2)
-        y2 = np.log10(relaxFunc)                 # relaxFuncの出力をnp.ndarrayに変更したのでこのように簡単に書ける
-        y2_label = r'log[$\phi$($t$)]'
-        y_lim = [np.min(y2)-1.0, np.max(y2)+1.0]
-        label2 = 'Relaxation function (log)'
+        label2 = r'Creep compliance (log)'
         res_pos = [0.05, 0.85]
         if fitting == 1:
             pass
-        elif fitting == 0:
+        if fitting == 0:
             fitTimes = fitTimes()
             y_fit, param = curveFit(x2_scaled, y2, fitTimes)        
-            fit_result = r'$\phi(t) \propto (t/\tau)^{{{0:.2f}}}$'.format(param[0])
-            label_fit = r'Fitted relaxation function'
+            fit_result = r'$J(t) \propto (t/\tau)^{{{0:.2f}}}$'.format(param[0])
+            label_fit = r'Fitted creep compliance'
         legend_loc='upper left'
-        savefile = './png/'+save_text+'relaxation_func.png'
+        savefile = './png/'+save_text+'creep_compliance.png'
+
+    if select == 1:
+        y1 = creepFunc(model, k, retardTime, x1)
+        y1_label = r'$\psi$($t$)'
+        label1 = 'Creep function (linear)'
+        creepFunc = creepFunc(model, k, retardTime, x2)
+        y2 = np.log10(creepFunc)                 # creepFuncの出力をnp.ndarrayに変更したのでこのように簡単に書ける
+        y2_label = r'log[$\psi$($t$)]'
+        y_lim = [np.min(y2)-1.0, np.max(y2)+1.0]
+        label2 = 'Creep function (log)'
+        res_pos = [0.05, 0.85]
+        if fitting == 1:
+            pass
+        if fitting == 0:
+            fitTimes = fitTimes()
+            y_fit, param = curveFit(x2_scaled, y2, fitTimes)        
+            fit_result = r'$\psi(t) \propto (t/\tau)^{{{0:.2f}}}$'.format(param[0])
+            label_fit = r'Fitted creep function'
+        legend_loc='upper left'
+        savefile = './png/'+save_text+'creep_func.png'
 
     # drawing graphs
     fig = plt.figure(figsize=(8,10), tight_layout=True)
@@ -203,10 +201,10 @@ if __name__=='__main__':
     ax2.set_axisbelow(True)
     if fitting == 1:
         pass
-    elif fitting == 0:
+    if fitting == 0:
         ax2.plot(x2_scaled, y_fit, c='b', ls=':', label=label_fit)
         ax2.text(0.05, 0.5, fit_result, transform=ax2.transAxes)
-
-    fig.savefig(savefile)
+    
+    fig.savefig(savefile, dpi=300)
 
     plt.show()
