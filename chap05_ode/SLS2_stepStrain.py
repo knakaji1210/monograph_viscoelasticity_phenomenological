@@ -34,6 +34,7 @@ try:
 except ValueError:
     strain_i = 0.2         # [Pa] ステップ歪み
 
+# ODE解析で用いる関数の定義
 def SLS2_stepStrain(s, t, e, infMod, tau):
 # e: 歪み, s: 応力, infMod: 緩和弾性率, tau: 緩和時間
 # ここでは下でargsとしてe=strain_iを入れてステップ応力を実現
