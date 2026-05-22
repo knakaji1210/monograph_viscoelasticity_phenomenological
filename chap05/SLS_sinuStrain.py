@@ -9,16 +9,19 @@ def reqParams():
     except ValueError:
         freq = 6 / np.pi
     angFreq = 2*np.pi*freq
+    # 以上はSLS Iの共振周波数に合わせたデフォルト値
+    # SLS IIの場合はfreq = 5 / np.piだと共振周波数に合わせた値にな理、値は1.59 Hz.
+
     try:
         strain_amp = float(input('strain amplitute [] (default = 0.1): '))
     except ValueError:
         strain_amp = 0.1         # [] 歪み振幅
     try:
-        select = int(input('Selection (SLS I : 0, SLS II: 1): '))
+        select = int(input('Selection (SLS I : 1, SLS II: 2): '))
     except ValueError:
-        select = 0
+        select = 1
 
-    if select == 0:
+    if select == 1:
         # 変数の設定
         try:
             E1 = float(input('modulus 1 [MPa] (default = 1.0 MPa): '))*10**6
@@ -44,7 +47,7 @@ def reqParams():
         figtext = r'$\tau$ = {0:.2f} s, $f$ = {1:.3f} Hz, $\omega\tau$ = {2:.2f}'.format(tau, freq, angFreq*tau)
         savefile = './png/sinuStrain_SLS1_(f={0:.2f}Hz).png'.format(freq)
 
-    if select == 1:
+    if select == 2:
         # 変数の設定
         try:
             E1 = float(input('modulus 1 [MPa] (default = 1.0 MPa): '))*10**6
@@ -66,7 +69,8 @@ def reqParams():
         numer = insMod*(1/k + tau*angFreq*(2j/2))
         denom = 1 + tau*angFreq*(2j/2)
         comMod = numer/denom
-        figtext = r'$\tau$ = {0:.2f} s, $f$ = {1:.3f} Hz, $\omega\tau$ = {2:.2f}'.format(tau, Freq, angFreq*tau)
+        modeltext = r'SLS II model'
+        figtext = r'$\tau$ = {0:.2f} s, $f$ = {1:.3f} Hz, $\omega\tau$ = {2:.2f}'.format(tau, freq, angFreq*tau)
         savefile = './png/sinuStress_SLS2_(f={0:.2f}Hz).png'.format(freq)
 
     return angFreq, strain_amp, comMod, modeltext, figtext, savefile
