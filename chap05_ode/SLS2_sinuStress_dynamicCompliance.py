@@ -1,4 +1,4 @@
-# SLS Iの常微分方程式（振動応力）
+# SLS IIモデルの常微分方程式（振動応力）
 # 周波数応答（動的コンプライアンス）
 
 '''
@@ -24,7 +24,7 @@ else:
     axisoption = ""
 
 '''
-テキストの式(5.11)をベースに組み立てる
+テキストの式(5.39)をベースに組み立てる
 '''
 
 # 変数の設定
@@ -39,12 +39,12 @@ except ValueError:
 try:
     eta = float(input('viscosity [kPa s] (default = 100.0 kPa s): '))*10**3
 except ValueError:
-    eta = 10**5               # [Pa s] 粘度
+    eta = 10**5             # [Pa s] 粘度
 
-insMod = E1                 # [Pa] 瞬間弾性率
-infMod = E1*E2/(E1+E2)      # [Pa] 緩和弾性率
+insMod = E1+E2              # [Pa] 瞬間弾性率
+infMod = E2                 # [Pa] 緩和弾性率
 k = insMod/infMod
-tau = eta/E2                # [s] 緩和時間
+tau = eta/E1                # [s] 緩和時間
 
 # 振動応力の設定
 try:
@@ -68,12 +68,12 @@ freq_list = np.logspace(log_freq_min, log_freq_max, num_freq)
 aft_array = 2 * np.pi * freq_list * tau
 
 # ODE解析で用いる関数の定義
-def SLS1_sinuStress(e, t, samp, af, insMod, k, tau):
+def SLS2_sinuStress(e, t, samp, af, insMod, k, tau):
 # e: 歪み, s: 応力, insMod: 瞬間弾性率, tau: 緩和時間
 # ここではsampとafを指定し、この中でsの関数を作り振動応力を実現
-    s = samp*np.sin(af*t)
+    s = samp * np.sin(af * t)
     dsdt = samp*af*np.cos(af*t)
-    dedt = (k*s/insMod + tau*dsdt/insMod - e)/tau   # (5.11'')
+    dedt = (s/insMod +tau*dsdt/insMod - e/k)/tau  # (5.39)
     return dedt
 
 def getNearestIndex2value(list,value):
@@ -117,7 +117,7 @@ for freq in freq_list:
     stress_f = samp*np.sin(af*(t - t_start))        # 入力信号
     stress = np.concatenate([stress, stress_f])
     # ODEの解析
-    sol = odeint(SLS1_sinuStress, e0, t - t_start, args=(samp,af,insMod,k,tau)) # ODEの解
+    sol = odeint(SLS2_sinuStress, e0, t - t_start, args=(samp,af,insMod,k,tau)) # ODEの解
     strain_f = sol[:, 0]            # 応力履歴
     strain = np.concatenate([strain, strain_f]) 
     e0 = strain[-1]                 # 次のODE計算のために初期条件e0を更新
@@ -159,7 +159,7 @@ fig = plt.figure(figsize=(8,5), tight_layout=True)
 ax1 = fig.add_subplot(111)
 ax2 = ax1.twinx()
 ax2.grid(ls='dotted')
-title_text = "SLS I model: sinusoidal stress (frequecy sweep)"
+title_text = "SLS II model: sinusoidal stress (frequecy sweep)"
 ax1.set_title(title_text)
 ax1.set_axisbelow(True)
 ax1.set_xscale('log')
@@ -167,7 +167,7 @@ ax1.set_xlabel(r'$\omega\tau$')
 
 # テキスト描画
 var_text = r'$\sigma_{{amp}}$ = {0:.2f} MPa, $E_1$ = {1:.1f} MPa, $E_2$ = {2:.1f} MPa, $\eta$ = {3:.1f} kPa s'.format(samp/10**6,E1/10**6,E2/10**6,eta/10**3)
-eq_text = r'd$\epsilon$/d$t$ = ($k$$\sigma$/$E_i$ + $\tau$/$E_i$ d$\sigma$/d$t$ - $\epsilon$)/$\tau$'
+eq_text = r'd$\epsilon$/d$t$ = ($\sigma$/$E_i$ + $\tau$/$E_i$ d$\sigma$/d$t$ -$\epsilon$/$k$)/$\tau$'
 res_text = r'$\tau$ = {0:.2f} s'.format(tau)
 
 if axisoption == "-log":
@@ -197,9 +197,9 @@ h2, l2 = ax2.get_legend_handles_labels()
 ax1.legend(h1 + h2, l1 + l2)
 
 if axisoption == "-log":
-    savefile = "./png/SLS1_sinuStress_dynamicCompliance(log)_(tau={0:.1f}s).png".format(tau)
+    savefile = "./png/SLS2_sinuStress_dynamicCompliance(log)_(tau={0:.1f}s).png".format(tau)
 else:
-    savefile = "./png/SLS1_sinuStress_dynamicCompliance(linear)_(tau={0:.1f}s).png".format(tau)
+    savefile = "./png/SLS2_sinuStress_dynamicCompliance(linear)_(tau={0:.1f}s).png".format(tau)
 
 fig.savefig(savefile, dpi=300)
 
