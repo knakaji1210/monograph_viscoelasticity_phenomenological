@@ -251,8 +251,8 @@ ani = animation.FuncAnimation(fig, update, frames=steps,
                     init_func=init, blit=True, interval=interval_ms, repeat=False)
 
 savefile = './mp4/SLS1_sinuStrain_ani_(f={0:.2f}Hz).mp4'.format(freq)
-ani.save(savefile, writer='ffmpeg', fps=fps, extra_args=['-r', '30'])
-#ani.save(savefile, writer='ffmpeg', fps=fps, extra_args=['-r', '500'])
+ani.save(savefile, writer='ffmpeg', fps=fps, extra_args=['-r', '60'])
+#ani.save(savefile, writer='ffmpeg', fps=fps, extra_args=['-r', '500'])  # 高周波数の場合
 
 plt.tight_layout()
 plt.show()

@@ -154,7 +154,7 @@ def animate(i):
 ani = animation.FuncAnimation(fig, animate, frames=steps, interval=interval_ms, blit=True)
 
 savefile = './mp4/SLS1_sinuStress_(f={0:.2f}Hz).mp4'.format(freq)
-ani.save(savefile, writer='ffmpeg', fps=fps, extra_args=['-r', '30'])
+ani.save(savefile, writer='ffmpeg', fps=fps, extra_args=['-r', '60'])
 #ani.save(savefile, writer='ffmpeg', fps=fps, extra_args=['-r', '500'])  # 高周波数の場合
 
 plt.tight_layout()
