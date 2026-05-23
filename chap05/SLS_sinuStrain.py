@@ -10,7 +10,7 @@ def reqParams():
         freq = 6 / np.pi
     angFreq = 2*np.pi*freq
     # 以上はSLS Iの共振周波数に合わせたデフォルト値
-    # SLS IIの場合はfreq = 5 / np.piだと共振周波数に合わせた値にな理、値は1.59 Hz.
+    # SLS IIの場合はfreq = 5 / np.piだと共振周波数に合わせた値になり、値は1.59 Hz.
 
     try:
         strain_amp = float(input('strain amplitute [] (default = 0.1): '))

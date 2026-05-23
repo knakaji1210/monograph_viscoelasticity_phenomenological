@@ -61,9 +61,9 @@ def complexMod(model, E, k, tau, af):
         losMod = comMod.imag
     return strMod, losMod
 
-def freqAxis(relaxTime):
-    centerAngFreq = 1 / relaxTime
-    angFreq = np.logspace(int(np.log10(centerAngFreq))-1.0, int(np.log10(centerAngFreq))+3.0, 51)
+def freqAxis(relaxTime, k):
+    centerAngFreq = 1 / relaxTime*k
+    angFreq = np.logspace(int(np.log10(centerAngFreq))-2.0, int(np.log10(centerAngFreq))+2.0, 51)
     scaledAngFreq = angFreq*relaxTime
     freqAxes = [angFreq, scaledAngFreq]
     return freqAxes
@@ -126,7 +126,7 @@ if __name__=='__main__':
     # calcul1ating complex Modulus and loss tangent
     E1, E2, eta, insMod, infMod, relaxTime, k, idx_x, model_text, save_text, res_text = reqParams(model)
     param_text = r'($E_i$ = {0:.2f} MPa, $E_{{\infty}}$ = {1:.2f} MPa, $\tau$ = {2:.1f} s)'.format(insMod/10**6, infMod/10**6, relaxTime)
-    freqAxes = freqAxis(relaxTime)
+    freqAxes = freqAxis(relaxTime, k)
     fitting = -1
     try:
         select = int(input('Selection (complex modulus (linear): 0, complex modulus (log): 1, loss tangent: 2): '))
