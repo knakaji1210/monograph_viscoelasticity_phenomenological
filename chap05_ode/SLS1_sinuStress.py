@@ -43,7 +43,7 @@ af = 2*np.pi*freq
 # ODE解析で用いる関数の定義
 def SLS1_sinuStress(e, t, samp, af, insMod, k, tau):
 # e: 歪み, s: 応力, insMod: 瞬間弾性率, tau: 緩和時間
-# ここではsampとafを指定し、この中でsの関数を作り振動歪みを実現
+# ここではsampとafを指定し、この中でsの関数を作り振動応力を実現
     s = samp*np.sin(af*t)
     dsdt = samp*af*np.cos(af*t)
     dedt = (k*s/insMod + tau*dsdt/insMod - e)/tau   # (5.11'')
@@ -103,7 +103,7 @@ fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(8, 7), sharex=True)
 # --- 上段：応力 (Input) ---
 ax1.set_xlim(start_time, end_time)
 ax1.set_ylim(-np.max(s)*1.5, np.max(s)*1.5) # 縦軸を固定
-ax1.set_ylabel('Stress, $\sigma$ /MPa')
+ax1.set_ylabel('Applied stress, $\sigma$ /MPa')
 ax1.set_title("SLS I model: sinusoidal stress")
 ax1.grid(True, ls='--')
 
@@ -112,11 +112,11 @@ line_stress_s1, = ax1.plot([], [], color='green', ls="dashed", lw=1, label='$\si
 line_stress_s2, = ax1.plot([], [], color='orange', ls="dashed", lw=1, label='$\sigma$ (dashpot in Voigt)')
 ax1.legend(loc='upper right')
 
-# --- 下段：応力 (Response) ---
+# --- 下段：歪み (Response) ---
 ax2.set_xlim(start_time, end_time)
 ax2.set_ylim(-np.max(e)*1.5, np.max(e)*1.5) # 縦軸を固定
 ax2.set_xlabel('$t$ /s')
-ax2.set_ylabel('Applied strain, $\epsilon$ /')
+ax2.set_ylabel('Strain, $\epsilon$ /')
 ax2.grid(True, ls='--')
 
 line_strain, = ax2.plot([], [], color='blue', lw=2, label='Response to sinusoidal stress')
