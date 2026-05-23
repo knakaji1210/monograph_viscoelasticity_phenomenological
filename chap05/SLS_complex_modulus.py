@@ -1,42 +1,65 @@
-# complex modulus of SLS I model
+# complex modulus of SLS I & SLS II models
  
 import numpy as np
 from scipy.optimize import curve_fit
 import matplotlib.pyplot as plt
 
-def calc_complexMod(E, k, tau, af):
-    numer = E*(1 + tau*af*(2j/2))
-    # E must be infMod
-    denom = 1 + (tau/k)*af*(2j/2)
-    comMod = numer/denom
-    strMod = comMod.real
-    losMod = comMod.imag
-    return strMod, losMod
-
-def complexMod(E, k, tau, angFreq):
-    strMod, losMod = calc_complexMod(E, k, tau, angFreq)
-    complexMod = [strMod, losMod]
-    return complexMod
-
-def reqParams():
+def reqParams(model):
+    # 変数の設定
     try:
         E1 = float(input('modulus 1 [MPa] (default = 1.0 MPa): '))*10**6
     except ValueError:
-        E1 = 10**6                  # [Pa] modulus
+        E1 = 10**6                  # [Pa] 弾性率
     try:
         E2 = float(input('modulus 2 [MPa] (default = 0.2 MPa): '))*10**6
     except ValueError:
-        E2 = 2*10**5                # [Pa] modulus
+        E2 = 2*10**5                # [Pa] 弾性率
     try:
         eta = float(input('viscosity [kPa s] (default = 100.0 kPa s): '))*10**3
     except ValueError:
-        eta = 10**5               # [Pa s] viscosity
+        eta = 10**5               # [Pa s] 粘度
 
-    insMod = E1                     # [Pa] instantaneous modulus
-    infMod = E1*E2/(E1+E2)          # [Pa] equilibrium modulus
-    k = insMod/infMod
-    relaxTime = eta/E2             # [s] retardation time
-    return E1, E2, eta, insMod, infMod, k, relaxTime
+    if model == 1:                  # SLS I
+        # パラメータの計算
+        insMod = E1                 # [Pa] 瞬間弾性率
+        infMod = E1*E2/(E1+E2)      # [Pa] 緩和弾性率
+        relaxTime = eta/E2          # [s] 緩和時間
+        k = insMod/infMod
+        idx_x = 1/k
+        model_text = r'SLS I model '
+        save_text = r'SLS1_'
+        res_text = r'$E_i$ = {0:.2f} MPa, $E_\infty$ = {1:.2f} MPa, $\tau$ = {2:.2f} s, $t_{{1/e}}$/$\tau$ = {3:.2f}'.format(insMod/10**6, infMod/10**6, relaxTime, idx_x)
+
+    elif model == 2:                # SLS II
+        # パラメータの計算
+        insMod = E1+E2              # [Pa] 瞬間弾性率
+        infMod = E2                 # [Pa] 緩和弾性率
+        relaxTime = eta/E1          # [s] 緩和時間
+        k = insMod/infMod
+        idx_x = 1
+        model_text = r'SLS II model '
+        save_text = r'SLS2_'
+        res_text = r'$E_i$ = {0:.2f} MPa, $E_\infty$ = {1:.2f} MPa, $\tau$ = {2:.2f} s, $t_{{1/e}}$/$\tau$ = {3:.2f}'.format(insMod/10**6, infMod/10**6, relaxTime, idx_x)
+
+    return E1, E2, eta, insMod, infMod, relaxTime, k, idx_x, model_text, save_text, res_text
+
+
+def complexMod(model, E, k, tau, af):
+    if model == 1:
+        numer = E*(1 + tau*af*(2j/2))
+        # E must be infMod
+        denom = 1 + (tau/k)*af*(2j/2)
+        comMod = numer/denom
+        strMod = comMod.real
+        losMod = comMod.imag
+    elif model == 2:
+        numer = E*(1/k + tau*af*(2j/2))
+        # E must be insMod
+        denom = 1 + tau*af*(2j/2)
+        comMod = numer/denom
+        strMod = comMod.real
+        losMod = comMod.imag
+    return strMod, losMod
 
 def freqAxis(relaxTime):
     centerAngFreq = 1 / relaxTime
@@ -96,8 +119,12 @@ def curveFit(scaledAngFreq, fitAngFreqs):
     return fit_strMod, fit_losMod, fit_result1, fit_result2
 
 if __name__=='__main__':
+    try:
+        model = int(input('Selection (SLS I : 1, SLS II: 2): '))
+    except ValueError:
+        model = 1   
     # calcul1ating complex Modulus and loss tangent
-    E1, E2, eta, insMod, infMod, k, relaxTime = reqParams()
+    E1, E2, eta, insMod, infMod, relaxTime, k, idx_x, model_text, save_text, res_text = reqParams(model)
     param_text = r'($E_i$ = {0:.2f} MPa, $E_{{\infty}}$ = {1:.2f} MPa, $\tau$ = {2:.1f} s)'.format(insMod/10**6, infMod/10**6, relaxTime)
     freqAxes = freqAxis(relaxTime)
     fitting = -1
@@ -109,8 +136,12 @@ if __name__=='__main__':
     angFreq = freqAxes[0]
     scaledAngFreq = freqAxes[1]
     scaledAngFreq_label = r'log($\omega\tau$)'
-    strMod = complexMod(infMod, k, relaxTime, angFreq)[0]  # E = infMod
-    losMod = complexMod(infMod, k, relaxTime, angFreq)[1]  # E = infMod
+    if model == 1:
+        strMod = complexMod(model, infMod, k, relaxTime, angFreq)[0]  # E = infMod
+        losMod = complexMod(model, infMod, k, relaxTime, angFreq)[1]  # E = infMod
+    elif model == 2:
+        strMod = complexMod(model, insMod, k, relaxTime, angFreq)[0]  # E = insMod
+        losMod = complexMod(model, insMod, k, relaxTime, angFreq)[1]  # E = insMod
     losTan = losMod / strMod
     log_scaledAngFreq = np.log10(scaledAngFreq)
     log_strMod = np.log10(strMod)
@@ -127,7 +158,7 @@ if __name__=='__main__':
         c2 = 'b'
         a = 1
         legend_loc='upper left'
-        savefile = './png/SLS1_complex_modulus_linear.png'
+        savefile = './png/'+save_text+'complex_modulus_linear.png'
 
     if select == 1:
         y1 = log_strMod
@@ -140,7 +171,7 @@ if __name__=='__main__':
         c2 = 'b'
         a = 1
         legend_loc='upper left'
-        savefile = './png/SLS1_complex_modulus_log.png'
+        savefile = './png/'+save_text+'complex_modulus_log.png'
         try:
             fitting = int(input('Selection (curve fit: 0, no curve fit: 1): '))
         except ValueError:
@@ -162,12 +193,12 @@ if __name__=='__main__':
         c2 = 'b'
         a = 0
         legend_loc='upper right'
-        savefile = './png/SLS1_loss_tangent_compMod.png'
+        savefile = './png/'+save_text+'loss_tangent_compMod.png'
 
     # drawing graphs
     fig = plt.figure(figsize=(8,5), tight_layout=True)
     ax = fig.add_subplot(111)
-    ax.set_title('SLS I model '+param_text)
+    ax.set_title(model_text+param_text)
     ax.set_xlabel(scaledAngFreq_label)
     ax.set_ylabel(y_label)
     ax.scatter(log_scaledAngFreq, y1, c=c1, label=label1)
