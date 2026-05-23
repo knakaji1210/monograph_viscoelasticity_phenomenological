@@ -46,7 +46,7 @@ infMod = E1*E2/(E1+E2)      # [Pa] 緩和弾性率
 k = insMod/infMod
 tau = eta/E2                # [s] 緩和時間
 
-# 振動応力の設定
+# 振動歪みの設定
 try:
     log_freq_min = float(input('log(freq_min) for forced oscillation (default=-1.2): '))
 except ValueError:
@@ -149,8 +149,8 @@ strMod = samp_array * cos_pdiff / eamp
 losMod = samp_array * sin_pdiff / eamp
 
 if axisoption == "-log":
-    strMod = strMod
-    losMod = losMod
+    strMod = strMod*10**6
+    losMod = losMod*10**6
 else:
     strMod = strMod
     losMod = losMod
@@ -165,6 +165,7 @@ ax1.set_axisbelow(True)
 ax1.set_xscale('log')
 ax1.set_xlabel(r'$\omega\tau$')
 
+# テキスト描画
 var_text = r'$\epsilon_{{amp}}$ = {0:.2f}, $E_1$ = {1:.1f} MPa, $E_2$ = {2:.1f} MPa, $\eta$ = {3:.1f} kPa s'.format(eamp,E1/10**6,E2/10**6,eta/10**3)
 eq_text = r'd$\sigma$/d$t$ = ($E_i$$\epsilon$ + $E_i$$\tau$ d$\epsilon$/d$t$ - $k$$\sigma$)/$\tau$'
 res_text = r'$\tau$ = {0:.1f} s'.format(tau)
