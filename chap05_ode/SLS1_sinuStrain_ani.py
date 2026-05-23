@@ -64,7 +64,7 @@ time_duration = end_time - start_time       # [s] 継続時間
 time_duration_pre = event_time - start_time # [s] ステップ前の継続時間
 time_duration_post = end_time - event_time  # [s] ステップ後の継続時間
 fps = 60            # 1秒あたりのフレーム数、30だと足りないので60に変更
-#fps = 100           # 高周波の場合はfps=100とかしないといけない
+#fps = 500           # 高周波数の場合
 steps = int(time_duration * fps) + 1        # 総フレーム数
 interval_ms = 1000 / fps                    # 1コマあたりのミリ秒
 t = np.linspace(start_time, end_time, steps)
@@ -252,6 +252,7 @@ ani = animation.FuncAnimation(fig, update, frames=steps,
 
 savefile = './mp4/SLS1_sinuStrain_ani_(f={0:.2f}Hz).mp4'.format(freq)
 ani.save(savefile, writer='ffmpeg', fps=fps, extra_args=['-r', '30'])
+#ani.save(savefile, writer='ffmpeg', fps=fps, extra_args=['-r', '500'])
 
 plt.tight_layout()
 plt.show()
