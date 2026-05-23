@@ -71,7 +71,7 @@ def reqParams():
         comMod = numer/denom
         modeltext = r'SLS II model'
         figtext = r'$\tau$ = {0:.2f} s, $f$ = {1:.3f} Hz, $\omega\tau$ = {2:.2f}'.format(tau, freq, angFreq*tau)
-        savefile = './png/sinuStress_SLS2_(f={0:.2f}Hz).png'.format(freq)
+        savefile = './png/sinuStrain_SLS2_(f={0:.2f}Hz).png'.format(freq)
 
     return angFreq, strain_amp, comMod, modeltext, figtext, savefile
 
@@ -124,7 +124,7 @@ if __name__=='__main__':
     ax1.legend(h1+h2, l1+l2, loc='upper right')
     ax1.grid()
 
-    fig.text(0.15, 0.15, figtext)
+    fig.text(0.15, 0.85, modeltext)
     fig.text(0.15, 0.15, figtext)
     fig.text(0.15, 0.20, restext)
 

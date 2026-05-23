@@ -9,16 +9,19 @@ def reqParams():
     except ValueError:
         freq = 0.3183
     angFreq = 2*np.pi*freq
+    # 以上はSLS Iの共振周波数に合わせたデフォルト値
+    # SLS IIの場合はfreq = 5 / 6*np.piだと共振周波数に合わせた値になり、値は0.265 Hz.
+
     try:
         stress_amp = float(input('stress amplitute [MPa] (default = 0.02 MPa): '))*10**6
     except ValueError:
         stress_amp = 0.02*10**6     # [Pa] 応力振幅
     try:
-        select = int(input('Selection (SLS I : 0, SLS II: 1): '))
+        select = int(input('Selection (SLS I : 1, SLS II: 2): '))
     except ValueError:
-        select = 0
+        select = 1
 
-    if select == 0:
+    if select == 1:
         # 変数の設定
         try:
             E1 = float(input('modulus 1 [MPa] (default = 1.0 MPa): '))*10**6
@@ -44,7 +47,7 @@ def reqParams():
         figtext = r'$\tau$ = {0:.2f} s, $f$ = {1:.3f} Hz, $\omega\tau$ = {2:.2f}'.format(tau, freq, angFreq*tau)
         savefile = './png/sinuStress_SLS1_(f={0:.2f}Hz).png'.format(freq)
 
-    if select == 1:
+    if select == 2:
         # 変数の設定
         try:
             E1 = float(input('modulus 1 [MPa] (default = 1.0 MPa): '))*10**6
