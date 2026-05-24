@@ -61,10 +61,13 @@ def complexMod(model, E, k, tau, af):
         losMod = comMod.imag
     return strMod, losMod
 
-def freqAxis(relaxTime, k):
-    centerAngFreq = 1 / relaxTime*k
-    angFreq = np.logspace(int(np.log10(centerAngFreq))-2.0, int(np.log10(centerAngFreq))+2.0, 51)
-    scaledAngFreq = angFreq*relaxTime
+def freqAxis(relaxTime, model, k):
+    if model == 1:
+        centerScaledAngFreq = k
+    elif model == 2:
+        centerScaledAngFreq = 1
+    scaledAngFreq = np.logspace(np.log10(centerScaledAngFreq)-2.0, np.log10(centerScaledAngFreq)+2.0, 51)
+    angFreq = scaledAngFreq/relaxTime
     freqAxes = [angFreq, scaledAngFreq]
     return freqAxes
 
@@ -126,7 +129,7 @@ if __name__=='__main__':
     # calcul1ating complex Modulus and loss tangent
     E1, E2, eta, insMod, infMod, relaxTime, k, idx_x, model_text, save_text, res_text = reqParams(model)
     param_text = r'($E_i$ = {0:.2f} MPa, $E_{{\infty}}$ = {1:.2f} MPa, $\tau$ = {2:.1f} s)'.format(insMod/10**6, infMod/10**6, relaxTime)
-    freqAxes = freqAxis(relaxTime, k)
+    freqAxes = freqAxis(relaxTime, model, k)
     fitting = -1
     try:
         select = int(input('Selection (complex modulus (linear): 0, complex modulus (log): 1, loss tangent: 2): '))
@@ -164,7 +167,7 @@ if __name__=='__main__':
         y1 = log_strMod
         y2 = log_losMod
         y_label = r'log($E^\prime$, $E^{{\prime\prime}}$ /Pa)'
-        ylim = [np.min(y1)-3, np.max(y1)+1]
+        ylim = [np.min(y1)-2, np.max(y1)+1]
         label1 = r'$E^\prime$ (log)'
         label2 = r'$E^{{\prime\prime}}$ (log)'
         c1 = 'r'
@@ -209,8 +212,8 @@ if __name__=='__main__':
     if fitting == 0:
         ax.plot(log_scaledAngFreq, fit_strMod, c='r', ls=':', label=r'fitted $E^{\prime}$')
         ax.plot(log_scaledAngFreq, fit_losMod, c='b', ls=':', label=r'fitted $E^{{\prime\prime}}$')
-        fig.text(0.2, 0.30, fit_result1)
-        fig.text(0.2, 0.25, fit_result2)
+        fig.text(0.2, 0.25, fit_result1)
+        fig.text(0.2, 0.20, fit_result2)
 
     ax.set_ylim(ylim[0], ylim[1])   
     ax.legend(loc=legend_loc)
