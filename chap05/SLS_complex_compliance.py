@@ -191,7 +191,7 @@ if __name__=='__main__':
         c2 = 'b'
         a = 0
         legend_loc='upper right'
-        savefile = './png/'+save_text+'loss_tangent.png'
+        savefile = './png/'+save_text+'loss_tangent_compComp.png'
 
     # drawing graphs
     fig = plt.figure(figsize=(8,5), tight_layout=True)
