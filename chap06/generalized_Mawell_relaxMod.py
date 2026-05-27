@@ -3,7 +3,6 @@
 import numpy as np
 from scipy.optimize import curve_fit
 import matplotlib.pyplot as plt
-from matplotlib import gridspec as gs
 
 # マクスウェル要素の緩和弾性率の計算式
 def calcRelaxMod(E1, E2, tau, t):
@@ -43,31 +42,31 @@ def timeAxisChoice():
     return select, time
 
 def reqParams():
-    maxwellMod_list = []
-    viscosity_list = []
-    relaxTime_list = []
+    E_list = []
+    eta_list = []
+    tau_list = []
     try:
         infMod = float(input('Enter equilibrium modulus value (MPa) (default = 0.1 MPa): '))*10**6
     except ValueError:
         infMod = 10**5
     try:
-        numComponent = int(input('Enter the number of Maxwell components (default = 1): '))
+        numComp = int(input('Enter the number of Maxwell components (default = 1): '))
     except ValueError:
-        numComponent = 1
-    for i in range(numComponent):
+        numComp = 1
+    for j in range(numComp):
         try:
-            maxwellMod = float(input('Enter modulus value of Maxwell component (MPa) (default = 1 MPa): '))*10**6
+            Ej = float(input('Enter modulus value of Maxwell component (MPa) (default = 1 MPa): '))*10**6
         except ValueError:
-            maxwellMod = 10**6
-        maxwellMod_list.append(maxwellMod)
+            Ej = 10**6
+        E_list.append(Ej)
         try:
-            viscosity = float(input('Enter viscosity value of Maxwell component (kPa s) (default = 100 kPa s): '))*10**3
+            etaj = float(input('Enter viscosity value of Maxwell component (kPa s) (default = 100 kPa s): '))*10**3
         except ValueError:
-            viscosity = 10**5
-        viscosity_list.append(viscosity)
-        relaxTime = viscosity/maxwellMod
-        relaxTime_list.append(relaxTime)
-    return numComponent, infMod, maxwellMod_list, viscosity_list, relaxTime_list
+            etaj = 10**5
+        eta_list.append(etaj)
+        tauj = etaj/Ej
+        tau_list.append(tauj)
+    return numComp, infMod, E_list, eta_list, tau_list
 
 def fitTimes():
     try:
@@ -132,23 +131,23 @@ def relaxSpectrumFunc(x, y, y_orig):
 if __name__=='__main__':
     # calcul1ating relaxation modulus
     select, time = timeAxisChoice()
-    numComponent, infMod, maxwellMod_list, viscosity_list, relaxTime_list = reqParams()
-    insMod = infMod + np.sum(maxwellMod_list)   # 瞬間弾性率=単独バネの（平衡）弾性率＋各マクスウェル要素の弾性率の和　式(6.12)
-    param_text = r'($E_\infty$ = {0:.1f} MPa, $E_i$ = {1:.1f} MPa, {2} Maxwell components)'.format(infMod/10**6, insMod/10**6, numComponent)
+    numComp, infMod, E_list, eta_list, tau_list = reqParams()
+    insMod = infMod + np.sum(E_list)   # 瞬間弾性率=単独バネの（平衡）弾性率＋各マクスウェル要素の弾性率の和　式(6.12)
+    param_text = r'($E_i$ = {0:.1f} MPa, $E_\infty$ = {1:.1f} MPa, {2} Maxwell components)'.format(insMod/10**6, infMod/10**6, numComp)
     fitting = -1
     spectrum = -1
 
     # 緩和弾性率の計算
     relaxMod = infMod * np.ones(len(time))      # ゲタとして平衡弾性率のnp配列を用意
-    for i in range(numComponent):   # 各マクスウェル要素分を追加（ただし、平衡男性率は追加済みなのでcalcRelaxModの該当引数は0にする）
-        relaxMod = relaxMod + calcRelaxMod(maxwellMod_list[i], 0, relaxTime_list[i], time)
+    for i in range(numComp):   # 各マクスウェル要素分を追加（ただし、平衡男性率は追加済みなのでcalcRelaxModの該当引数は0にする）
+        relaxMod = relaxMod + calcRelaxMod(E_list[i], 0, tau_list[i], time)
     log_time = np.log10(time)
     with np.errstate(divide='ignore'):
         log_relaxMod = [np.log10(r) for r in relaxMod]
     # 各マクスウェル要素の緩和弾性率の計算（ただし全ての要素でゲタとして平衡弾性率を加える）
-    relaxMod_comp = np.zeros((numComponent,len(time)))
-    for i in range(numComponent):
-        relaxMod_comp[i] = calcRelaxMod(maxwellMod_list[i], infMod, relaxTime_list[i], time)
+    relaxMod_comp = np.zeros((numComp,len(time)))
+    for j in range(numComp):
+        relaxMod_comp[j] = calcRelaxMod(E_list[j], infMod, tau_list[j], time)
     with np.errstate(divide='ignore'):
         log_relaxMod_comp = np.log10(relaxMod_comp)
 
@@ -196,22 +195,20 @@ if __name__=='__main__':
             x_cropped, relaxSpectrum, log_relaxSpectrum = relaxSpectrumFunc(x,y,y_orig)
 
     # drawing graphs
-    fig = plt.figure(figsize=(8,6), tight_layout=True)
-    spec = gs.GridSpec(ncols=4, nrows=2, width_ratios=[1,3,3,1],height_ratios=[1,5])
-    ax = fig.add_subplot(spec[1, 0:4])
+    fig, ax = plt.subplots(figsize=(8, 6), tight_layout=True)
     ax.set_title('generalized Maxwell model '+param_text)
     ax.set_xlabel(x_label)
     ax.set_ylabel(y_label)
     ax.scatter(x, y, c=c, label=label)
 
-    for i in range(numComponent):
-        ax.plot(x, log_relaxMod_comp[i], c='b', linewidth=0.5)
+    for j in range(numComp):
+        ax.plot(x, log_relaxMod_comp[j], c='b', linewidth=0.5)
 
     if fitting == 1:
         pass
     if fitting == 0:
         ax.plot(x, fit_relaxMod, c='b', ls=':', label='fitted Relaxation modulus')
-        fig.text(0.15, 0.20, fit_result)
+        fig.text(0.2, 0.40, fit_result)
         ax.set_xlabel(x_label)
 
     if spectrum == 0:
@@ -230,15 +227,18 @@ if __name__=='__main__':
     ax.grid()
     ax.set_axisbelow(True)
 
-    ax2 = fig.add_subplot(spec[0, 1:4])
-    plt.axis('off')
-    column_names=['#{}'.format(i+1) for i in range(numComponent)]
-    column_labels=[r"", r" log($E_j$ /Pa)", r"$\eta_j$ /kPa s", r"log($\tau_j$ /s)"]
-    log_maxwellMod_list = ['{0:.1f}'.format(np.log10(m)) for m in maxwellMod_list]
-    viscosity_list = ['{0:.1f}'.format(v/10**3) for v in viscosity_list]    
-    log_relaxTime_list = ['{0:.1f}'.format(np.log10(t)) for t in relaxTime_list]
-    tableData=[column_names, log_maxwellMod_list, viscosity_list, log_relaxTime_list]
-    ax2.table(cellText=tableData,rowLabels=column_labels,loc="center")
+    param_table = ax.table(
+        cellText=[['{0:.1f}'.format(np.log10(E_list[j])) for j in range(numComp)],
+                  ['{0:.1f}'.format(eta_list[j]/10**3) for j in range(numComp)],
+                  ['{0:.2f}'.format(np.log10(tau_list[j])) for j in range(numComp)]],
+        rowLabels=[r"log($E_j$ /Pa)", r"$\eta_j$ /kPa s", r"log($\tau_j$ /s)"],
+        colLabels=['#{}'.format(j+1) for j in range(numComp)],
+        loc='bottom',
+        bbox=[0.0, -0.45, 1.0, 0.3]  # [x, y, 幅, 高さ] で微調整
+    )
+    param_table.set_fontsize(11)
+    param_table.scale(1, 1.5) # セルの大きさを調整
+    plt.subplots_adjust(bottom=0.2)
 
     fig.savefig(savefile)
 
