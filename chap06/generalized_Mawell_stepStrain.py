@@ -91,7 +91,7 @@ e2 = stress_array[1]/E_list[1]
 e3 = stress_array[2]/E_list[2]
 
 # グラフの初期設定
-fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(8, 10), sharex=True)
+fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(8, 7.9), sharex=True, tight_layout=True)
 
 # --- 上段：歪み (Input) ---
 ax1.set_xlim(start_time, end_time)
