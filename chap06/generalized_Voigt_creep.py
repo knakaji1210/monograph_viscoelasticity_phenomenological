@@ -1,14 +1,13 @@
-# relaxation modulus of generalized Maxwell model (multiple freqs)
+# creep compliance of generalized Voigt model (multiple freqs)
 
 import numpy as np
 from scipy.optimize import curve_fit
 import matplotlib.pyplot as plt
 
-# マクスウェル要素の緩和弾性率の計算式
-def calcRelaxMod(E1, E2, tau, t):
-    # E1: Maxwell spring component, E2: infMod
-    relaxMod = E2 + E1*np.exp(-t/tau)
-    return relaxMod
+# フォークト要素のクリープコンプライアンスの計算式
+def calcCreepComp(E, tau, t):
+    creepComp = (1 - np.exp(-t/tau))/E
+    return creepComp
 
 def reqTimes():
     try:
@@ -32,7 +31,7 @@ def timeAxis():
 
 def timeAxisChoice():
     try:
-        select = int(input('Selection (relaxation modulus (linear): 0, relaxation modulus (log): 1): '))
+        select = int(input('Selection (creep compliance (linear): 0, creep compliance (log): 1): '))
     except ValueError:
         select = 0
     if select == 0:
@@ -46,27 +45,27 @@ def reqParams():
     eta_list = []
     tau_list = []
     try:
-        infMod = float(input('Enter equilibrium modulus value (MPa) (default = 0.1 MPa): '))*10**6
+        eta = float(input('Enter viscosity value for single Newtonian element (kPa s) (default = 1000 kPa s): '))*10**3
     except ValueError:
-        infMod = 10**5
+        eta = 10**6
     try:
-        numComp = int(input('Enter the number of Maxwell components (default = 1): '))
+        numComp = int(input('Enter the number of Voigt components (default = 1): '))
     except ValueError:
         numComp = 1
     for j in range(numComp):
         try:
-            Ej = float(input('Enter modulus value of Maxwell component (MPa) (default = 1 MPa): '))*10**6
+            Ej = float(input('Enter modulus value of Voigt component (MPa) (default = 1.0 MPa): '))*10**6
         except ValueError:
             Ej = 10**6
         E_list.append(Ej)
         try:
-            etaj = float(input('Enter viscosity value of Maxwell component (kPa s) (default = 100 kPa s): '))*10**3
+            etaj = float(input('Enter viscosity value of Voigt component (kPa s) (default = 100 kPa s): '))*10**3
         except ValueError:
             etaj = 10**5
         eta_list.append(etaj)
         tauj = etaj/Ej
         tau_list.append(tauj)
-    return numComp, infMod, E_list, eta_list, tau_list
+    return numComp, eta, E_list, eta_list, tau_list
 
 def fitTimes():
     try:
@@ -100,9 +99,9 @@ def fittedArray(x_array, param):
 def curveFit(time, fitFreqs):
     minFit = fitRegion(time, fitTimes[0], fitTimes[1])[0]
     maxFit = fitRegion(time, fitTimes[0], fitTimes[1])[1]
-    param,_ = curve_fit(loglogFit, log_time[minFit:maxFit], log_relaxMod[minFit:maxFit])
+    param,_ = curve_fit(loglogFit, log_time[minFit:maxFit], log_creepComp[minFit:maxFit])
     fit_relaxMod = fittedArray(log_time, param)
-    fit_result = "$E$($t$) ∝ $t^{{{0:.2f}}}$".format(param[0])
+    fit_result = "$J$($t$) ∝ $t^{{{0:.2f}}}$".format(param[0])
     return fit_relaxMod, fit_result
 
 '''
@@ -129,53 +128,59 @@ def relaxSpectrumFunc(x, y, y_orig):
 '''
 
 if __name__=='__main__':
-    # calcul1ating relaxation modulus
+    # calcul1ating creep compliance
     select, time = timeAxisChoice()
-    numComp, infMod, E_list, eta_list, tau_list = reqParams()
-    insMod = infMod + np.sum(E_list)   # 瞬間弾性率=単独バネの（平衡）弾性率＋各マクスウェル要素の弾性率の和　式(6.12)
-    param_text = r'($E_i$ = {0:.1f} MPa, $E_\infty$ = {1:.1f} MPa, {2} Maxwell components)'.format(insMod/10**6, infMod/10**6, numComp)
+    numComp, eta, E_list, eta_list, tau_list = reqParams()
+    infMod = 1 / np.sum(1 / np.array(E_list))   # 平衡弾性率=各フォークト要素の弾性率の和　式(6.27)
+    param_text = r'($E_\infty$ = {0:.1f} MPa, $\eta$ = {1:.1f} kPa s, {2} Voigt components)'.format(infMod/10**6, eta/10**3, numComp)
     fitting = -1
     spectrum = -1
 
-    # 緩和弾性率の計算
-    relaxMod = infMod * np.ones(len(time))      # ゲタとして平衡弾性率のnp配列を用意
-    for j in range(numComp):   # 各マクスウェル要素分を追加（ただし、平衡男性率は追加済みなのでcalcRelaxModの該当引数は0にする）
-        relaxMod = relaxMod + calcRelaxMod(E_list[j], 0, tau_list[j], time)
+    # クリープコンプライアンスの計算
+    if eta == 0:
+        creepComp = np.zeros(len(time))
+    else:
+        creepComp = time / eta     # ゲタとして粘性流動項t/etaのnp配列, 式(6.32)
+    for j in range(numComp):
+        creepComp = creepComp + calcCreepComp(E_list[j], tau_list[j], time)
     log_time = np.log10(time)
     with np.errstate(divide='ignore'):
-        log_relaxMod = [np.log10(r) for r in relaxMod]
-    # 各マクスウェル要素の緩和弾性率の計算（ただし全ての要素でゲタとして平衡弾性率を加える）
-    relaxMod_comp = np.zeros((numComp,len(time)))
-    for j in range(numComp):
-        relaxMod_comp[j] = calcRelaxMod(E_list[j], infMod, tau_list[j], time)
+        log_creepComp = np.log10(creepComp)
+    # 各フォークト要素の緩和弾性率の計算（ただし全ての要素でゲタとして粘性流動項を加える）
+    creepComp_comp = np.zeros((numComp,len(time)))
+    if eta == 0:
+        for j in range(numComp):
+            creepComp_comp[j] = calcCreepComp(E_list[j], tau_list[j], time)
+    else:
+        for j in range(numComp):
+            creepComp_comp[j] = calcCreepComp(E_list[j], tau_list[j], time) +time / eta
     with np.errstate(divide='ignore'):
-        log_relaxMod_comp = np.log10(relaxMod_comp)
+        log_creepComp_comp = np.log10(creepComp_comp)
 
     if select == 0:
         x = time
-        y = log_relaxMod
+        y = log_creepComp
         x_label = r'$t$ /s'
-        y_label = r'log[$E$($t$) /Pa]'
+        y_label = r'log[$J$($t$) /Pa$^{{{-1}}}$]'
         xlim = [0, np.max(x)]
-        ylim = [np.min(y)-0.5, np.max(y)+0.5]
-        label = r'Relaxation modulus (linear)'
-        legend_loc = 'upper right'
+        ylim = [np.min(y[1:])-0.5, np.max(y)+1.0]
+        label = r'Creep compliance (linear)'
+        legend_loc = 'upper left'
         c = 'r'
-        savefile = './png/gen_Maxwell_relaxMod_linear.png'
+        savefile = './png/gen_Voigt_creepComp_linear.png'
 
     if select == 1:
         x = log_time
-        y = log_relaxMod
-        ymin_l = np.max([np.min(y)-0.5,-0.5])
-        y_orig = relaxMod
+        y = log_creepComp
+        y_orig = creepComp
         x_label = r'log[$t$ /s]'
-        y_label = r'log[$E$($t$) /Pa]'
+        y_label = r'log[$J$($t$) /Pa$^{{{-1}}}$]'
         xlim = [np.min(x)-0.5, np.max(x)+0.5]
-        ylim = [ymin_l, np.max(y)+0.5]
-        label = r'Relaxation modulus (log)'
-        legend_loc = 'upper right'
+        ylim = [np.min(y[1:])-0.5, np.max(y)+0.5]
+        label = r'Creep compliance (log)'
+        legend_loc = 'upper left'
         c = 'r'
-        savefile = './png/gen_Maxwell_relaxMod_log.png'
+        savefile = './png/gen_Voigt_creepComp_log.png'
         try:
             fitting = int(input('Selection (curve fit: 0, no curve fit: 1): '))
         except ValueError:
@@ -184,7 +189,7 @@ if __name__=='__main__':
             pass
         if fitting == 0:
             fitTimes = fitTimes()
-            fit_relaxMod, fit_result = curveFit(time, fitTimes)
+            fit_creepComp, fit_result = curveFit(time, fitTimes)
         try:
             spectrum = int(input('Selection (with spectrum: 0, without spectrum: 1): '))
         except ValueError:
@@ -196,19 +201,19 @@ if __name__=='__main__':
 
     # drawing graphs
     fig, ax = plt.subplots(figsize=(8, 6), tight_layout=True)
-    ax.set_title('generalized Maxwell model '+param_text)
+    ax.set_title('generalized Voigt model '+param_text)
     ax.set_xlabel(x_label)
     ax.set_ylabel(y_label)
     ax.scatter(x, y, c=c, label=label)
 
     for j in range(numComp):
-        ax.plot(x, log_relaxMod_comp[j], c='b', linewidth=0.5)
+        ax.plot(x, log_creepComp_comp[j], c='b', linewidth=0.5)
 
     if fitting == 1:
         pass
     if fitting == 0:
-        ax.plot(x, fit_relaxMod, c='b', ls=':', label='fitted Relaxation modulus')
-        fig.text(0.2, 0.40, fit_result)
+        ax.plot(x, fit_creepComp, c='b', ls=':', label='fitted Creep compliance')
+        fig.text(0.2, 0.75, fit_result)
         ax.set_xlabel(x_label)
 
     if spectrum == 0:
@@ -219,7 +224,7 @@ if __name__=='__main__':
         ax1.set_ylim(-0.1*np.max(y),1.5*np.max(y))
         ax1.set_ylabel('Relaxation Spectrum / Eins')
         ax1.legend(loc='upper right')
-        savefile = './png/genMaxwell_relaxation_modulus_log_spectrum.png'
+        savefile = './png/genVoigt_relaxation_modulus_log_spectrum.png'
 
     ax.set_xlim(xlim[0], xlim[1]) 
     ax.set_ylim(ylim[0], ylim[1])
