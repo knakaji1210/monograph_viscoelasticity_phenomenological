@@ -45,6 +45,10 @@ def reqParams():
     eta_list = []
     tau_list = []
     try:
+        insMod = float(input('Enter instantaneous modulus value (MPa) (default = 200.0 MPa): '))*10**6
+    except ValueError:
+        insMod = 200*10**6
+    try:
         eta = float(input('Enter viscosity value for single Newtonian element (kPa s) (default = 1000 kPa s): '))*10**3
     except ValueError:
         eta = 10**6
@@ -65,7 +69,7 @@ def reqParams():
         eta_list.append(etaj)
         tauj = etaj/Ej
         tau_list.append(tauj)
-    return numComp, eta, E_list, eta_list, tau_list
+    return numComp, insMod, eta, E_list, eta_list, tau_list
 
 def fitTimes():
     try:
@@ -130,17 +134,24 @@ def relaxSpectrumFunc(x, y, y_orig):
 if __name__=='__main__':
     # calcul1ating creep compliance
     select, time = timeAxisChoice()
-    numComp, eta, E_list, eta_list, tau_list = reqParams()
-    infMod = 1 / np.sum(1 / np.array(E_list))   # 平衡弾性率=各フォークト要素の弾性率の和　式(6.27)
-    param_text = r'($E_\infty$ = {0:.1f} MPa, $\eta$ = {1:.1f} kPa s, {2} Voigt components)'.format(infMod/10**6, eta/10**3, numComp)
+    numComp, insMod, eta, E_list, eta_list, tau_list = reqParams()
+    if insMod == 0:
+        infMod = 1 / np.sum(1 / np.array(E_list))   # 平衡弾性率=各フォークト要素の弾性率の逆和の逆数　式(6.28)
+    else:
+        infMod = 1 / (np.sum(1 / np.array(E_list)) + 1/insMod)  # 平衡弾性率=各フォークト要素の弾性率および瞬間弾性率の逆和の逆数　式(6.32)
+    param_text = r'($E_i$ = {0:.1f} MPa, $E_\infty$ = {1:.1f} MPa, $\eta$ = {2:.1f} kPa s, {3} components)'.format(insMod/10**6, infMod/10**6, eta/10**3, numComp)
     fitting = -1
     spectrum = -1
 
     # クリープコンプライアンスの計算
-    if eta == 0:
-        creepComp = np.zeros(len(time))
+    if eta == 0 and insMod == 0:
+        creepComp = np.zeros(len(time))                     # ゲタなし
+    elif eta == 0 and insMod != 0:
+        creepComp = np.ones(len(time))/insMod               # ゲタとして瞬間弾性率の逆数のnp配列, 式(6.40)    
+    elif eta != 0 and insMod == 0:
+        creepComp = time / eta                              # ゲタとして粘性流動項t/etaのnp配列, 式(6.44)
     else:
-        creepComp = time / eta     # ゲタとして粘性流動項t/etaのnp配列, 式(6.32)
+        creepComp = time / eta + np.ones(len(time))/insMod  # ゲタとして両方の寄与
     for j in range(numComp):
         creepComp = creepComp + calcCreepComp(E_list[j], tau_list[j], time)
     log_time = np.log10(time)
@@ -148,12 +159,18 @@ if __name__=='__main__':
         log_creepComp = np.log10(creepComp)
     # 各フォークト要素の緩和弾性率の計算（ただし全ての要素でゲタとして粘性流動項を加える）
     creepComp_comp = np.zeros((numComp,len(time)))
-    if eta == 0:
+    if eta == 0 and insMod == 0:
         for j in range(numComp):
             creepComp_comp[j] = calcCreepComp(E_list[j], tau_list[j], time)
+    elif eta == 0 and insMod != 0:
+        for j in range(numComp):
+            creepComp_comp[j] = calcCreepComp(E_list[j], tau_list[j], time) + 1/insMod
+    elif eta != 0 and insMod == 0:
+        for j in range(numComp):
+            creepComp_comp[j] = calcCreepComp(E_list[j], tau_list[j], time) + time/eta
     else:
         for j in range(numComp):
-            creepComp_comp[j] = calcCreepComp(E_list[j], tau_list[j], time) +time / eta
+            creepComp_comp[j] = calcCreepComp(E_list[j], tau_list[j], time) + time/eta + 1/insMod
     with np.errstate(divide='ignore'):
         log_creepComp_comp = np.log10(creepComp_comp)
 
