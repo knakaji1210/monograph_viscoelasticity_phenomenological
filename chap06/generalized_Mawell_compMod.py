@@ -114,7 +114,7 @@ if __name__=='__main__':
     select, angFreq = angFreqAxisChoice()
     numComp, infMod, E_list, eta_list,tau_list = reqParams()
     insMod = infMod + np.sum(E_list)
-    param_text = r'($E_i$ = {0:.1f} MPa, $E_\infty$ = {1:.1f} MPa, {2} Maxwell components)'.format(insMod/10**6, infMod/10**6, numComp)
+    param_text = r'($E_i$ = {0:.1f} MPa, $E_\infty$ = {1:.1f} MPa, {2} components)'.format(insMod/10**6, infMod/10**6, numComp)
     fitting = -1
 
     # 複素弾性率の計算
@@ -171,7 +171,7 @@ if __name__=='__main__':
         c2 = 'b'
         a = 1
         legend_loc='upper left'
-        savefile = './png/genMaxwell_compMod_log.png'
+        savefile = './png/gen_Maxwell_compMod_log.png'
         try:
             fitting = int(input('Selection (curve fit: 0, no curve fit: 1): '))
         except ValueError:
@@ -189,14 +189,14 @@ if __name__=='__main__':
         x_label = r'log[$\omega$]'
         y_label = r'loss tangent /'
         xlim = [np.min(x)-0.5, np.max(x)+0.5]
-        ylim = [np.max(y1)*(-0.1), np.max(y1)*2]
+        ylim = [-0.1, 2.5]
         label1 = 'Loss tangent'
         label2 = ''
         c1 = 'g'
         c2 = 'b'
         a = 0
         legend_loc='upper right'
-        savefile = './png/genMaxwell_losTan.png'
+        savefile = './png/gen_Maxwell_losTan.png'
 
     if select == 3:
         x = scaled_strMod
@@ -212,7 +212,7 @@ if __name__=='__main__':
         c2 = 'b'
         a = 0
         legend_loc='upper right'
-        savefile = './png/genMaxwell_cole_cole.png'
+        savefile = './png/gen_Maxwell_cole_cole.png'
 
     # drawing graphs
     fig, ax = plt.subplots(figsize=(8, 6), tight_layout=True)
@@ -244,7 +244,7 @@ if __name__=='__main__':
         pass
     if fitting == 0:
         ax.plot(x, fit_strMod, c='b', ls=':', label='fitted Storage modulus')
-        fig.text(0.25, 0.45, fit_result)
+        fig.text(0.5, 0.8, fit_result)
         ax.set_xlabel(x_label)
 
     ax.set_xlim(xlim[0], xlim[1]) 

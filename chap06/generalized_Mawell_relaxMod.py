@@ -133,7 +133,7 @@ if __name__=='__main__':
     select, time = timeAxisChoice()
     numComp, infMod, E_list, eta_list, tau_list = reqParams()
     insMod = infMod + np.sum(E_list)   # 瞬間弾性率=単独バネの（平衡）弾性率＋各マクスウェル要素の弾性率の和　式(6.12)
-    param_text = r'($E_i$ = {0:.1f} MPa, $E_\infty$ = {1:.1f} MPa, {2} Maxwell components)'.format(insMod/10**6, infMod/10**6, numComp)
+    param_text = r'($E_i$ = {0:.1f} MPa, $E_\infty$ = {1:.1f} MPa, {2} components)'.format(insMod/10**6, infMod/10**6, numComp)
     fitting = -1
     spectrum = -1
 
@@ -208,7 +208,7 @@ if __name__=='__main__':
         pass
     if fitting == 0:
         ax.plot(x, fit_relaxMod, c='b', ls=':', label='fitted Relaxation modulus')
-        fig.text(0.2, 0.40, fit_result)
+        fig.text(0.5, 0.75, fit_result)
         ax.set_xlabel(x_label)
 
     if spectrum == 0:
