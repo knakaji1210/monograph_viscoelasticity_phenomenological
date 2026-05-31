@@ -7,7 +7,7 @@ from matplotlib import patches
 import matplotlib.animation as animation
 
 '''
-テキストの式(6.17)をベースに組み立てる
+テキストの式(6.20)をベースに組み立てる
 '''
 
 # 変数の設定
@@ -48,7 +48,7 @@ except ValueError:
 def genMaxwell_stepStrain(s, t, e, tau):
 # e: 歪み, s: 応力, tau: 緩和時間
 # ここでは下でargsとしてe=strain_iを入れてステップ歪みを実現
-    dsdt =  - s/tau       # (6.17)
+    dsdt =  - s/tau       # (6.20)
     return dsdt
 
 # データ準備
