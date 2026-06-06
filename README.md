@@ -8,3 +8,4 @@ Unorganzed中には未整理の過去のものがある
 
 ＜未解決問題＞  
 chap03_odeのVoigtの周波数掃引は後日  
+chap06_odeのgeneralized_Voigtは後日  
