@@ -108,28 +108,12 @@ def curveFit(time, fitFreqs):
     fit_result = "$J$($t$) ∝ $t^{{{0:.2f}}}$".format(param[0])
     return fit_relaxMod, fit_result
 
-'''
-def relaxSpectrumFunc(x, y, y_orig):
-    y_nd = []
-    for i in range(len(x)-1):
-        if i == 0:
-            pass
-        else:
-            nd = (y[i+1]-y[i-1])/(x[i+1]-x[i-1])
-            y_nd.append(nd)   
-    x_cropped = np.delete(x,-1)
-    x_cropped = np.delete(x_cropped,0)
-    y_cropped = np.delete(y,-1)
-    y_cropped = np.delete(y_cropped,0)
-    y_orig_cropped = np.delete(y_orig,-1)
-    y_orig_cropped = np.delete(y_orig_cropped,0)
-    relaxSpectrum = [-y*nd for (y, nd) in zip(y_orig_cropped, y_nd)]
-    rs = [-y*nd for (y, nd) in zip(y_orig_cropped, y_nd)]
-#    relaxSpectrum = np.nan_to_num(rs, nan=1e-100)
+def calcRetardSpectrum(x, y):
+    dydx = np.gradient(y, x)
+    retardSpectrum = 10**y * dydx
     with np.errstate(divide='ignore'):
-        log_relaxSpectrum = [np.log10(r) for r in relaxSpectrum]
-    return x_cropped, relaxSpectrum, log_relaxSpectrum
-'''
+        log_retardSpectrum = np.log10(retardSpectrum)
+    return retardSpectrum, log_retardSpectrum
 
 if __name__=='__main__':
     # calcul1ating creep compliance
@@ -214,7 +198,7 @@ if __name__=='__main__':
         if spectrum == 1:
             pass
         if spectrum == 0:
-            x_cropped, relaxSpectrum, log_relaxSpectrum = relaxSpectrumFunc(x,y,y_orig)
+            retardSpectrum, log_retardSpectrum = calcRetardSpectrum(x,y)
 
     # drawing graphs
     fig, ax = plt.subplots(figsize=(8, 6), tight_layout=True)
@@ -234,14 +218,14 @@ if __name__=='__main__':
         ax.set_xlabel(x_label)
 
     if spectrum == 0:
-        y = [rs/insMod for rs in relaxSpectrum]
+        y = retardSpectrum*infMod
         legend_loc='upper left'
         ax1 = ax.twinx()
-        ax1.scatter(x_cropped, y, c='C0', ls=':', label='Relaxation Spectrum')
+        ax1.scatter(x, y, c='C0', ls=':', label='Retardation Spectrum')
         ax1.set_ylim(-0.1*np.max(y),1.5*np.max(y))
-        ax1.set_ylabel('Relaxation Spectrum / Eins')
+        ax1.set_ylabel(r'$L(t) E_\infty$')
         ax1.legend(loc='upper right')
-        savefile = './png/genVoigt_relaxation_modulus_log_spectrum.png'
+        savefile = './png/gen_Voigt_creepComp_log_sp.png'
 
     ax.set_xlim(xlim[0], xlim[1]) 
     ax.set_ylim(ylim[0], ylim[1])

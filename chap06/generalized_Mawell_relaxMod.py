@@ -196,14 +196,14 @@ if __name__=='__main__':
         ax.set_xlabel(x_label)
 
     if spectrum == 0:
-        y = [rs/insMod for rs in relaxSpectrum]
+        y = relaxSpectrum/insMod
         legend_loc='upper left'
         ax1 = ax.twinx()
         ax1.scatter(x, y, c='C0', ls=':', label='Relaxation Spectrum')
         ax1.set_ylim(-0.1*np.max(y),1.5*np.max(y))
-        ax1.set_ylabel('Relaxation Spectrum / Eins')
+        ax1.set_ylabel(r'$H(t) / E_i$')
         ax1.legend(loc='upper right')
-        savefile = './png/genMaxwell_relaxation_modulus_log_spectrum.png'
+        savefile = './png/gen_Maxwell_relaxMod_log_sp.png'
 
     ax.set_xlim(xlim[0], xlim[1]) 
     ax.set_ylim(ylim[0], ylim[1])
