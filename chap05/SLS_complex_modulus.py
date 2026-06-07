@@ -219,6 +219,6 @@ if __name__=='__main__':
     ax.legend(loc=legend_loc)
     ax.grid()
     ax.set_axisbelow(True)
-    fig.savefig(savefile)
+    fig.savefig(savefile, dpi=300)
 
     plt.show()

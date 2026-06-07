@@ -207,6 +207,6 @@ if __name__=='__main__':
         ax2.plot(x2_scaled, y_fit, c='b', ls=':', label=label_fit)
         ax2.text(0.05, 0.5, fit_result, transform=ax2.transAxes)
 
-    fig.savefig(savefile)
+    fig.savefig(savefile, dpi=300)
 
     plt.show()
