@@ -105,28 +105,12 @@ def curveFit(time, fitFreqs):
     fit_result = "$E$($t$) ∝ $t^{{{0:.2f}}}$".format(param[0])
     return fit_relaxMod, fit_result
 
-'''
-def relaxSpectrumFunc(x, y, y_orig):
-    y_nd = []
-    for i in range(len(x)-1):
-        if i == 0:
-            pass
-        else:
-            nd = (y[i+1]-y[i-1])/(x[i+1]-x[i-1])
-            y_nd.append(nd)   
-    x_cropped = np.delete(x,-1)
-    x_cropped = np.delete(x_cropped,0)
-    y_cropped = np.delete(y,-1)
-    y_cropped = np.delete(y_cropped,0)
-    y_orig_cropped = np.delete(y_orig,-1)
-    y_orig_cropped = np.delete(y_orig_cropped,0)
-    relaxSpectrum = [-y*nd for (y, nd) in zip(y_orig_cropped, y_nd)]
-    rs = [-y*nd for (y, nd) in zip(y_orig_cropped, y_nd)]
-#    relaxSpectrum = np.nan_to_num(rs, nan=1e-100)
+def calcRelaxSpectrum(x, y):
+    dydx = np.gradient(y, x)
+    relaxSpectrum = -10**y * dydx
     with np.errstate(divide='ignore'):
-        log_relaxSpectrum = [np.log10(r) for r in relaxSpectrum]
-    return x_cropped, relaxSpectrum, log_relaxSpectrum
-'''
+        log_relaxSpectrum = np.log10(relaxSpectrum)
+    return relaxSpectrum, log_relaxSpectrum
 
 if __name__=='__main__':
     # calcul1ating relaxation modulus
@@ -143,7 +127,7 @@ if __name__=='__main__':
         relaxMod = relaxMod + calcRelaxMod(E_list[j], 0, tau_list[j], time)
     log_time = np.log10(time)
     with np.errstate(divide='ignore'):
-        log_relaxMod = [np.log10(r) for r in relaxMod]
+        log_relaxMod = np.log10(relaxMod)
     # 各マクスウェル要素の緩和弾性率の計算（ただし全ての要素でゲタとして平衡弾性率を加える）
     relaxMod_comp = np.zeros((numComp,len(time)))
     for j in range(numComp):
@@ -192,7 +176,7 @@ if __name__=='__main__':
         if spectrum == 1:
             pass
         if spectrum == 0:
-            x_cropped, relaxSpectrum, log_relaxSpectrum = relaxSpectrumFunc(x,y,y_orig)
+            relaxSpectrum, log_relaxSpectrum = calcRelaxSpectrum(x,y)
 
     # drawing graphs
     fig, ax = plt.subplots(figsize=(8, 6), tight_layout=True)
@@ -215,7 +199,7 @@ if __name__=='__main__':
         y = [rs/insMod for rs in relaxSpectrum]
         legend_loc='upper left'
         ax1 = ax.twinx()
-        ax1.scatter(x_cropped, y, c='C0', ls=':', label='Relaxation Spectrum')
+        ax1.scatter(x, y, c='C0', ls=':', label='Relaxation Spectrum')
         ax1.set_ylim(-0.1*np.max(y),1.5*np.max(y))
         ax1.set_ylabel('Relaxation Spectrum / Eins')
         ax1.legend(loc='upper right')
@@ -240,6 +224,6 @@ if __name__=='__main__':
     param_table.scale(1, 1.5) # セルの大きさを調整
     plt.subplots_adjust(bottom=0.2)
 
-    fig.savefig(savefile)
+    fig.savefig(savefile, dpi=300)
 
     plt.show()

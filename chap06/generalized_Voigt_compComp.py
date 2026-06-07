@@ -300,6 +300,6 @@ if __name__=='__main__':
     param_table.scale(1, 1.5) # セルの大きさを調整
     plt.subplots_adjust(bottom=0.2)
 
-    fig.savefig(savefile)
+    fig.savefig(savefile, dpi=300)
 
     plt.show()
