@@ -1,4 +1,5 @@
 # Plot of Vogel-Fulcher-Tammann equation
+# 260322修正（講義：高分子レオロジーのため）
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -29,8 +30,8 @@ ax = fig.add_subplot(111)
 ax.set_title('Arrhnius vs Vogel-Fulcher-Tammann')
 ax.set_xlim(temp_min-10, temp_max+10)
 ax.set_ylim(ylim[0], ylim[1])
-ax.set_xlabel('temperature /K')
-ax.set_ylabel('log(eta(T) /Pa s)')
+ax.set_xlabel(r'$T$ /K')
+ax.set_ylabel(r'log($\eta$($T$) /Pa s)')
 ax.scatter(temp, log_Arrhenius, label='Arrhenius')
 ax.scatter(temp, log_VFT, label='Vogel-Fulcher-Tammann')
 
@@ -42,12 +43,12 @@ ax.legend(loc='upper right')
 ax.grid()
 ax.set_axisbelow(True)
 
-fig_text1 = 'Tv = {0:.0f} K'.format(temp_vogel) 
-fig_text2 = 'Tg = {0:.0f} K'.format(temp_glass) 
+fig_text1 = r'$T_{{V}}$ = {0:.0f} K'.format(temp_vogel) 
+fig_text2 = r'$T_{{g}}$ = {0:.0f} K'.format(temp_glass) 
 fig.text(0.18, 0.15, fig_text1, c='b')
 fig.text(0.41, 0.15, fig_text2, c='g')
 fig.text(0.09, 0.36, "12", c='r')
 
-fig.savefig('./png/VFT.png')
+fig.savefig('./png/VFT.png', dpi=300)
 
 plt.show()
