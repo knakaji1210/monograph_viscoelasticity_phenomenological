@@ -46,7 +46,7 @@ if __name__=='__main__':
     TV = Tg - 50        # Vogel temperature [K]
     deltaT = temp_max - Tg
     temp = np.linspace(Tg, temp_max, int(deltaT/10 + 1))
-    tim = np.logspace(-1, 1, 16)
+    tim = np.logspace(-4, -2, 16)
     log_tim = np.log10(tim)
     insMod = 3*mu*kB*temp
     viscosity = V0*np.exp(TA/(temp-TV))
