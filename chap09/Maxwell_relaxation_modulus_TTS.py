@@ -174,7 +174,8 @@ if __name__=='__main__':
                     label_txt = r"$E$ ($T$ = {0:.0f} K)".format(temp[i])
                     ax.plot(x, y, c=cm.jet(0.1+float(i)/12), marker="o", lw=0, label=label_txt)  
                     savefile = './png/Maxwell_scaled_relaxation_modulus_TTS_aTbT_log.png'  
-            
+
+        ax.legend(loc="upper left", bbox_to_anchor=(1.02, 1.0,), borderaxespad=0)            
         ax.grid()
         ax.set_axisbelow(True)
         fig.savefig(savefile, dpi=300)
