@@ -86,8 +86,8 @@ if __name__=='__main__':
 # 以下のデルタ関数の定義は暫定的なものであり、厳密なデルタ関数の定義ではない
     if select == 8:
         dx = 10**(-5)
-        dHeaviside = np.gradient(np.heaviside(x,0.5), dx)                 # Dirac delta (tentative), defined as the derivative of Heaviside function
-        data = dHeaviside / np.max(dHeaviside) * 1/dx /6
+        dHeaviside = np.gradient(np.heaviside(x,0.5), dx)       # Dirac delta (tentative), defined as the derivative of Heaviside function
+        data = dHeaviside / np.max(dHeaviside) * 1/dx /6        # 正規化のための係数は何故か6（不明点あり）            
         legend = 'Dirac delta'
         re = 1
         im = 0
