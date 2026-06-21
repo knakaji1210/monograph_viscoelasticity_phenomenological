@@ -44,6 +44,6 @@ if __name__=='__main__':
     ax.set_title(title_text)
     ax.legend(loc='upper left')
 
-    fig.savefig('./png/func.png')
+    fig.savefig(savefile, dpi=300)
 
     plt.show()
