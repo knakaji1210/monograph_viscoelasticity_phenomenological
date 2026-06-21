@@ -20,7 +20,7 @@ if __name__=='__main__':
     a = np.logspace(-2, 0, 3)
     x = np.linspace(-3, 3, 1000)
 
-    fig = plt.figure(tight_layout=True)
+    fig = plt.figure(figsize=(8,5), tight_layout=True)
     ax = fig.add_subplot(111)
     ax.grid()
     ax.set_xlabel(r'$\omega$')
