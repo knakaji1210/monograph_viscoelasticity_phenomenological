@@ -28,6 +28,7 @@ if __name__=='__main__':
     if select == 0:
         for i in range(len(a)):
             title_text = 'Real part of Plemelj formula'
+            savefile = './png/Plemelj_real.png'
             y = calc_Plemelj_real(a[i], x)
             ax.set_ylim(0,20)
             ax.plot(x, y, label=r'$\alpha$ = {0:.2f}'.format(a[i]))
@@ -35,6 +36,7 @@ if __name__=='__main__':
     elif select == 1:
         for i in range(len(a)):
             title_text = 'Imaginary part of Plemelj formula'
+            savefile = './png/Plemelj_imaginary.png'
             y = calc_Plemelj_imaginary(a[i], x)
             ax.set_ylim(-10,10)
             ax.plot(x, y, label=r'$\alpha$ = {0:.2f}'.format(a[i]))
@@ -42,6 +44,6 @@ if __name__=='__main__':
     ax.set_title(title_text)
     ax.legend(loc='upper left')
 
-#    fig.savefig('./png/func.png')
+    fig.savefig('./png/func.png')
 
     plt.show()
