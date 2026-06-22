@@ -9,20 +9,22 @@ xd = np.array([0, 1, 2, 3, 4, 5])
 yd = sp.factorial(xd, exact=True)
 
 # グラフの描画
-plt.figure(figsize=(8, 6))
-plt.scatter(xd+1, yd, label=r'factrial($n$)', color='red', zorder=1)
-plt.plot(x, y, label=r'$\Gamma(x)$', color='blue', linewidth=2, zorder=0)
+fig = plt.figure(figsize=(8,5), tight_layout=True)
+ax = fig.add_subplot(111)
+ax.scatter(xd+1, yd, label=r'$n$!', color='red', zorder=1)
+ax.plot(x, y, label=r'$\Gamma(x)$', color='blue', linewidth=2, zorder=0)
 
 
 # グラフの装飾
-plt.title('Gamma Function', fontsize=14)
-plt.xlabel('x', fontsize=12)
-plt.ylabel(r'$\Gamma(x)$', fontsize=12)
-plt.axhline(0, color='black', linewidth=1)
-plt.axvline(0, color='black', linewidth=1)
-plt.grid(True, linestyle='--', alpha=0.7)
-plt.legend(fontsize=12)
-plt.ylim(-10, 20)
+ax.set_title('Gamma Function', fontsize=14)
+ax.set_xlabel('x', fontsize=12)
+ax.set_ylabel(r'$\Gamma(x)$', fontsize=12)
+ax.grid(True, linestyle='--', alpha=0.7)
+ax.legend(loc='lower right')
+ax.set_xlim(-5.0, 5.0)
+ax.set_ylim(-10, 20)
+ax.hlines(0, -5.0, 5.0, ls=':', color='black')
+ax.vlines(0, -10.0, 20.0, ls=':', color='black')
 
 # 表示
 plt.savefig('./png/gamma_func.png', dpi=300)
