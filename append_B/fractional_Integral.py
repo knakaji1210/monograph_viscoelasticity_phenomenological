@@ -4,10 +4,11 @@
 differint：非整数階微積分（fractional calculus）を計算するためのPythonライブラリ
 alpha > 0 の場合は非整数階微分、alpha < 0 の場合は非整数階積分を計算
 
-df.GL / df.GLI：Grünwald-Letnikov定義、alphaは全ての実数値に対応
-df.RL / df.RLI：Riemann-Liouville定義、alpha < 1
-df.L1 / df.L1I：Caputo（L1）定義、0 < alpha < 1
-df.L2 / df.L2I：Caputo（L2）定義、1 < alpha < 2
+df.GL / df.GLI：Grünwald-Letnikov定義、alphaの制限なし
+df.RL：Riemann-Liouville定義、、alphaの制限なし？
+df.CaputoL1point：Caputo（L1）定義、0 < alpha < 1
+df.CaputoL2point：Caputo（L2）定義、0 < alpha < 1
+df.CaputoL2Cpoint：Caputo（L2C）定義、0 < alpha < 1, 1 < alpha < 2
 
 ここではdf.RLを利用
 '''
