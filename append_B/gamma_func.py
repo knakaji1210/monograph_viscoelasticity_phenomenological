@@ -11,7 +11,7 @@ yd = sp.factorial(xd, exact=True)
 # グラフの描画
 fig = plt.figure(figsize=(8,5), tight_layout=True)
 ax = fig.add_subplot(111)
-ax.scatter(xd+1, yd, label=r'$n$!', color='red', zorder=1)
+ax.scatter(xd+1, yd, label=r'$(n-1)!$', color='red', zorder=1)
 ax.plot(x, y, label=r'$\Gamma(x)$', color='blue', linewidth=2, zorder=0)
 
 
