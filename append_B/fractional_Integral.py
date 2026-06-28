@@ -7,10 +7,11 @@ alpha > 0 の場合は非整数階微分、alpha < 0 の場合は非整数階積
 df.GL / df.GLI：Grünwald-Letnikov定義、alphaの制限なし
 df.RL：Riemann-Liouville定義、、alphaの制限なし？
 df.CaputoL1point：Caputo（L1）定義、0 < alpha < 1
-df.CaputoL2point：Caputo（L2）定義、0 < alpha < 1
+df.CaputoL2point：Caputo（L2）定義、1 < alpha < 2
 df.CaputoL2Cpoint：Caputo（L2C）定義、0 < alpha < 1, 1 < alpha < 2
 
 ここではdf.RLを利用
+なお、Caputoの実装は不完全のようだ
 '''
 
 import numpy as np
