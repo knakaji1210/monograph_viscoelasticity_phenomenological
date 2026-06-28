@@ -108,7 +108,7 @@ if __name__=='__main__':
 
     ax.set_title(f"Fractional Integral of $f(t)$", fontsize=14)
     ax.set_xlabel(r"$t$", fontsize=12)
-    ax.set_ylabel(r"$I^{\lambda} f(t)$", fontsize=12)
+    ax.set_ylabel(r"$D^{-\lambda} f(t)$", fontsize=12)
     ax.grid(True, linestyle=":", alpha=0.6)
     ax.legend(fontsize=11)
 
