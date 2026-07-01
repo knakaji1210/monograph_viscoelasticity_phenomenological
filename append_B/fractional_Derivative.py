@@ -55,13 +55,13 @@ if __name__=='__main__':
     # 階数の配列
     nu_arr = np.array([0.2, 0.4, 0.6, 0.8, 1.0])
     # 古いバージョンでは微分の方は1.0だ計算できず、代わりに0.99で計算していたが、differintPでは1.0でも計算できるようになった
-    func_list = [r'$1$', r'$x$', r'$x^2$', r'$\sqrt{x}$', r'$e^x$', r'$\sin(x)$', r'$\cos(x)$']  # 関数のリスト
+    func_list = [r'$1$', r'$t$', r'$t^2$', r'$\sqrt{t}$', r'$e^t$', r'$\sin(t)$', r'$\cos(t)$']  # 関数のリスト
 
     # X軸のデータ点を生成
     ts = 0         # 下限
-    if select == 4:  # exp(x)の場合は上限を小さくする
+    if select == 4:  # exp(t)の場合は上限を小さくする
         te = 2.0      # 上限
-    elif select == 5 or select == 6:  # sin(x), cos(x)の場合
+    elif select == 5 or select == 6:  # sin(t), cos(t)の場合
         te = 6.28      # 上限
     else:    
         te = 4.0      # 上限

@@ -58,7 +58,7 @@ def calc_Caputo_derivative(func, nu, t_vals):
     return Caputo_derivs
 
 if __name__=='__main__':
-    select_text = 'Selection (1: 0, x: 1, x^2: 2, sqrt: 3, exp: 4, sin: 5, cos: 6, x^2 + 0.5: 7): '  
+    select_text = 'Selection (1: 0, t: 1, t^2: 2, sqrt: 3, exp: 4, sin: 5, cos: 6, t^2 + 0.5: 7): '  
     try:
         select = int(input(select_text))
     except ValueError:
@@ -82,7 +82,7 @@ if __name__=='__main__':
     n = 1000
     t_vals = np.linspace(ts, te, n)
 
-    func_list = [r'$1$', r'$x$', r'$x^2$', r'$\sqrt{x}$', r'$e^x$', r'$\sin(x)$', r'$\cos(x)$', r'$x^2$ + 0.5']  # 関数のリスト
+    func_list = [r'$1$', r'$t$', r'$t^2$', r'$\sqrt{t}$', r'$e^t$', r'$\sin(t)$', r'$\cos(t)$', r'$t^2$ + 0.5']  # 関数のリスト
 
     # 各計算の実行
     if select == 0:
