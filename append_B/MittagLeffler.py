@@ -105,6 +105,7 @@ if __name__=='__main__':
     # グラフの描画
     fig = plt.figure(figsize=(8,5), tight_layout=True)
     ax = fig.add_subplot(111)
+    ax.set_title(r'Mittag-Leffler Function, $E_{\alpha, \beta}(t)$', fontsize=14)
     ax.grid()
     ax.set_xlim(0, te)
     ax.set_ylim(ylim[0], ylim[1])

@@ -22,6 +22,7 @@ if __name__=='__main__':
     # グラフの描画
     fig = plt.figure(figsize=(8,5), tight_layout=True)
     ax = fig.add_subplot(111)
+    ax.set_title('Cauchy Repeated Integration', fontsize=14)
     ax.grid()
     ax.set_xlabel(r'$u$')
     ax.set_ylabel(r'$f(u)$, $(t-u)$, $(t-u)f(u)$')

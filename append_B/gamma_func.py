@@ -16,7 +16,7 @@ ax.plot(x, y, label=r'$\Gamma(x)$', color='blue', linewidth=2, zorder=0)
 
 
 # グラフの装飾
-ax.set_title('Gamma Function', fontsize=14)
+ax.set_title(r'Gamma Function, $\Gamma(x)$', fontsize=14)
 ax.set_xlabel('x', fontsize=12)
 ax.set_ylabel(r'$\Gamma(x)$', fontsize=12)
 ax.grid(True, linestyle='--', alpha=0.7)

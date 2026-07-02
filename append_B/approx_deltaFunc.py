@@ -14,7 +14,7 @@ if __name__=='__main__':
     # グラフの描画
     fig = plt.figure(figsize=(8,5), tight_layout=True)
     ax = fig.add_subplot(111)
-    ax.set_title(r'Approximated Delta Function)')
+    ax.set_title(r'Approximated Delta Function')
     ax.grid()
     ax.set_xlabel(r'$u$')
     ax.set_ylabel(r'$u^{{\epsilon-1}}$/$\Gamma(\epsilon)$')
