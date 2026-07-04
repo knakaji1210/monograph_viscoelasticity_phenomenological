@@ -15,6 +15,11 @@ if __name__=='__main__':
         select = int(input(select_text))
     except ValueError:
         select = 0
+ 
+    try:
+        l = float(input('Input the scale factor l (l > 0): '))
+    except ValueError:
+        l = 1.0
 
     nu_arr = np.array([0.05, 0.2, 0.4, 0.6, 0.8, 0.99])  # 階数の配列 
     func_list = [r'$e^t$', r'$t^{1-\nu} E_{\nu, \nu}(t)$']  # 関数のリスト
@@ -31,12 +36,12 @@ if __name__=='__main__':
         t_vals = np.logspace(log10_ts, log10_te, n)
         log10_t_vals = np.log10(t_vals)
 
-    y_exp = np.exp(t_vals)
+    y_exp = np.exp(l * t_vals)
     log10_y_exp = np.log10(y_exp)
     y_eiginFunc = np.zeros((len(nu_arr), len(t_vals)))  # 階数ごとの積分結果を格納する配列
     for i in range(len(nu_arr)):
         nu = nu_arr[i]
-        x_vals = t_vals**nu
+        x_vals = l * t_vals**nu
         y_eiginFunc[i] = t_vals**(1-nu) * MittagLeffler(nu, nu, x_vals, num_terms=50)
     log10_y_eiginFunc = np.log10(y_eiginFunc)
     ymax_linear = np.max(y_eiginFunc[-1])*1.1
@@ -46,6 +51,7 @@ if __name__=='__main__':
 # グラフの描画
 fig = plt.figure(figsize=(8,5), tight_layout=True)
 ax = fig.add_subplot(111)
+ax.set_title(f'Eigen Function, {func_list[1]}', fontsize=14)
 ax.grid()
 if select == 0:
     ax.set_xlim(ts, te)
@@ -59,7 +65,7 @@ if select == 0:
     savefile = './png/MittagLeffler_eigenFunc_linear.png'
 elif select == 1:
     ax.set_xlim(log10_ts, log10_te)
-    ax.set_ylim(ymin_log, ymax_log)
+#    ax.set_ylim(ymin_log, ymax_log)
     ax.plot(log10_t_vals, log10_y_exp, label=f"eigen Function of $D^{{1}} f(t)$, {func_list[0]}", color="black", linestyle="-")
     for i in range(len(nu_arr)):
         nu = nu_arr[i]
