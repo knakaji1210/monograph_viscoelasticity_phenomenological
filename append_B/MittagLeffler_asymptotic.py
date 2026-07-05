@@ -60,7 +60,7 @@ if __name__=='__main__':
     # グラフの描画
     fig = plt.figure(figsize=(8,5), tight_layout=True)
     ax = fig.add_subplot(111)
-    ax.set_title(f'Asymptotic Behavior of Mittag-Leffler Function', fontsize=14)
+    ax.set_title(f'Asymptotic Behavior of Mittag-Leffler Function ($\\alpha={a}, \\nu={nu}$)', fontsize=14)
     ax.grid()
     if select == 0:
         ax.set_xlim(ts, te)
