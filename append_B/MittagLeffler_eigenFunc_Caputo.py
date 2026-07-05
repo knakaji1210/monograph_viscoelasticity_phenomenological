@@ -1,4 +1,4 @@
-# 非整数階微分の固有関数としてのMittag=Leffler関数の表示（Riemann-Liouville微分）
+# 非整数階微分の固有関数としてのMittag=Leffler関数の表示（Caputo微分（L1））
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -21,12 +21,12 @@ if __name__=='__main__':
     except ValueError:
         a = 1.0
 
-    nu_arr = np.array([0.01, 0.2, 0.4, 0.6, 0.8, 0.999])  # 階数の配列 
-    func_list = [r'$e^{\alpha t}$', r'$t^{1-\nu} E_{\nu, \nu}(\alpha t^{\nu})$']  # 関数のリスト
+    nu_arr = np.array([0.05, 0.2, 0.4, 0.6, 0.8, 0.99])  # 階数の配列 
+    func_list = [r'$e^{\alpha t}$', r'$E_{\nu, 1}(\alpha t^{\nu})$']  # 関数のリスト
 
     if select == 0:  # 線形スケールの場合
         ts = 0      # 下限
-        te = 2      # 上限
+        te = 3      # 上限
         n = 1000    # 分割数
         t_vals = np.linspace(ts, te, n)
     elif select == 1:  # 対数スケールの場合
@@ -42,38 +42,38 @@ if __name__=='__main__':
     for i in range(len(nu_arr)):
         nu = nu_arr[i]
         x_vals = a * t_vals**nu
-        y_eiginFunc[i] = t_vals**(1-nu) * MittagLeffler(nu, nu, x_vals, num_terms=50)
+        y_eiginFunc[i] = MittagLeffler(nu, 1, x_vals, num_terms=50)
     log10_y_eiginFunc = np.log10(y_eiginFunc)
     ymax_linear = np.max(y_eiginFunc[-1])*1.1
-    ymin_log = np.min(log10_y_eiginFunc[0])*1.1
-    ymax_log = np.max(log10_y_eiginFunc[0])*3.0
+    ymin_log = np.min(log10_y_eiginFunc[0])-3.0
+    ymax_log = np.max(log10_y_eiginFunc[0])*2.0
 
 # グラフの描画
 fig = plt.figure(figsize=(8,5), tight_layout=True)
 ax = fig.add_subplot(111)
-ax.set_title(f'Eigen Function of $D^{{1}}$ and $D^{{\\nu}}$ (Riemann-Liouville)', fontsize=14)
+ax.set_title(f'Eigen Function of $D^{{1}}$ and $D^{{\\nu}}_{{C}}$ (Caputo)', fontsize=14)
 ax.grid()
 if select == 0:
     ax.set_xlim(ts, te)
     ax.set_ylim(0, ymax_linear)
-    ax.plot(t_vals, y_exp, label=f"eigen Function of $D^{{1}} f(t)$, {func_list[0]}", color="black", linestyle="-")
+    ax.plot(t_vals, y_exp, label=f"eigen Function of $D^{{1}} f(t)$, {func_list[0]}", color="gray", linestyle="-")
     for i in range(len(nu_arr)):
         nu = nu_arr[i]
-        ax.plot(t_vals, y_eiginFunc[i], label=f"eigen Function of $D^{{\\nu}} f(t), \\nu={nu}$", color=cmap(i/len(nu_arr)), linestyle="--")
+        ax.plot(t_vals, y_eiginFunc[i], label=f"eigen Function of $D^{{\\nu}}_{{C}} f(t), \\nu={nu}$", color=cmap(i/len(nu_arr)), linestyle="--")
     ax.set_xlabel(r"$t$", fontsize=12)
     ax.set_ylabel(f"{func_list[0]}, {func_list[1]}", fontsize=12)
-    savefile = './png/MittagLeffler_eigenFunc_RL_linear.png'
+    savefile = './png/MittagLeffler_eigenFunc_linear.png'
 elif select == 1:
     ax.set_xlim(log10_ts, log10_te)
     ax.set_ylim(ymin_log, ymax_log)
-    ax.plot(log10_t_vals, log10_y_exp, label=f"eigen Function of $D^{{1}} f(t)$, {func_list[0]}", color="black", linestyle="-")
+    ax.plot(log10_t_vals, log10_y_exp, label=f"eigen Function of $D^{{1}} f(t)$, {func_list[0]}", color="gray", linestyle="-")
     for i in range(len(nu_arr)):
         nu = nu_arr[i]
-        ax.plot(log10_t_vals, log10_y_eiginFunc[i], label=f"eigen Function of $D^{{\\nu}} f(t), \\nu={nu}$", color=cmap(i/len(nu_arr)), linestyle="--")
+        ax.plot(log10_t_vals, log10_y_eiginFunc[i], label=f"eigen Function of $D^{{\\nu}}_{{C}} f(t), \\nu={nu}$", color=cmap(i/len(nu_arr)), linestyle="--")
     ax.set_xlabel(r"log$_{10} (t)$", fontsize=12)
     ax.set_ylabel(r"log$_{10} ($" + f"{func_list[0]}, {func_list[1]})", fontsize=12)
 #    ax.set_ylabel(rf"log$_{{10}}$ ({func_list[0]}, {func_list[1]})$", fontsize=12)
-    savefile = './png/MittagLeffler_eigenFunc_RL_log.png'
+    savefile = './png/MittagLeffler_eigenFunc_log.png'
 ax.grid(True, linestyle=":", alpha=0.6)
 ax.legend(fontsize=11)
 
