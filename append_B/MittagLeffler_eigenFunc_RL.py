@@ -21,13 +21,13 @@ if __name__=='__main__':
     except ValueError:
         a = 1.0
 
-    nu_arr = np.array([0.01, 0.2, 0.4, 0.6, 0.8, 0.999])  # 階数の配列 
-    func_list = [r'$e^{\alpha t}$', r'$t^{1-\nu} E_{\nu, \nu}(\alpha t^{\nu})$']  # 関数のリスト
+    nu_arr = np.array([0.05, 0.2, 0.4, 0.6, 0.8, 0.999])  # 階数の配列 
+    func_list = [r'$e^{\alpha t}$', r'$t^{\nu-1} E_{\nu, \nu}(\alpha t^{\nu})$']  # 関数のリスト
 
-    if select == 0:  # 線形スケールの場合
-        ts = 0      # 下限
-        te = 2      # 上限
-        n = 1000    # 分割数
+    if select == 0:     # 線形スケールの場合
+        ts = 10**(-3)   # 下限
+        te = 2          # 上限
+        n = 1000        # 分割数
         t_vals = np.linspace(ts, te, n)
     elif select == 1:  # 対数スケールの場合
         log10_ts = -3   # 下限（0にすると0除算が起こる関数があるので）
@@ -42,11 +42,11 @@ if __name__=='__main__':
     for i in range(len(nu_arr)):
         nu = nu_arr[i]
         x_vals = a * t_vals**nu
-        y_eiginFunc[i] = t_vals**(1-nu) * MittagLeffler(nu, nu, x_vals, num_terms=50)
+        y_eiginFunc[i] = t_vals**(nu-1) * MittagLeffler(nu, nu, x_vals, num_terms=50)
     log10_y_eiginFunc = np.log10(y_eiginFunc)
-    ymax_linear = np.max(y_eiginFunc[-1])*1.1
-    ymin_log = np.min(log10_y_eiginFunc[0])*1.1
-    ymax_log = np.max(log10_y_eiginFunc[0])*3.0
+    ymax_linear = np.max(y_eiginFunc[-1])*2.0
+    ymin_log = -np.min(log10_y_eiginFunc[0])*1.0
+    ymax_log = np.max(log10_y_eiginFunc[0])*2.0
 
 # グラフの描画
 fig = plt.figure(figsize=(8,5), tight_layout=True)

@@ -62,7 +62,7 @@ if select == 0:
         ax.plot(t_vals, y_eiginFunc[i], label=f"eigen Function of $D^{{\\nu}}_{{C}} f(t), \\nu={nu}$", color=cmap(i/len(nu_arr)), linestyle="--")
     ax.set_xlabel(r"$t$", fontsize=12)
     ax.set_ylabel(f"{func_list[0]}, {func_list[1]}", fontsize=12)
-    savefile = './png/MittagLeffler_eigenFunc_linear.png'
+    savefile = './png/MittagLeffler_eigenFunc_Caputo_linear.png'
 elif select == 1:
     ax.set_xlim(log10_ts, log10_te)
     ax.set_ylim(ymin_log, ymax_log)
@@ -73,7 +73,7 @@ elif select == 1:
     ax.set_xlabel(r"log$_{10} (t)$", fontsize=12)
     ax.set_ylabel(r"log$_{10} ($" + f"{func_list[0]}, {func_list[1]})", fontsize=12)
 #    ax.set_ylabel(rf"log$_{{10}}$ ({func_list[0]}, {func_list[1]})$", fontsize=12)
-    savefile = './png/MittagLeffler_eigenFunc_log.png'
+    savefile = './png/MittagLeffler_eigenFunc_Caputo_log.png'
 ax.grid(True, linestyle=":", alpha=0.6)
 ax.legend(fontsize=11)
 
