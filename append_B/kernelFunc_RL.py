@@ -8,7 +8,7 @@ def calc_powerFunc(l, t):
 
 if __name__=='__main__':
 
-    l = np.linspace(-1, 2, 7)  # λの値を設定
+    l = np.linspace(-1, 2, 5)  # λの値を設定
     t = np.linspace(10**(-5), 2, 400)
 
     # グラフの描画
@@ -17,7 +17,7 @@ if __name__=='__main__':
     ax.set_title(r'Kernel Function of Riemann-Liouville Calculus', fontsize=14)
     ax.grid()
     ax.set_xlabel(r'$t$')
-    ax.set_ylabel(r'$\Phi_{\lambda}(t) = t^{{\lambda-1}}/\Gamma(\lambda)*h_s(t)$')
+    ax.set_ylabel(r'$\Phi_{\lambda,+}(t) = t^{{\lambda-1}}/\Gamma(\lambda)*h_s(t)$')
     for i in range(len(l)):
         y = calc_powerFunc(l[i], t)
         ax.plot(t, y, label=r'$\lambda$ = {0:.3f}'.format(l[i]))
