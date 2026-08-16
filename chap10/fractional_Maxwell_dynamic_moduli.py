@@ -33,13 +33,16 @@ def freqAxes(retardTime):
     freqAxes = [angFreq, scaledAngFreq]
     return freqAxes
 
+# このバージョンではこの部分だけ異なる。E'とE''の計算式をそのまま利用している。
+# fractional_Maxwell_complex_modulus.pyの結果と同じになることを確認済み。
 def calc_complexMod(E, tau, af, nu):
-    numer = E*(tau*af*(2j/2))**nu
+    x = (tau*af)**nu
+    strNumer = E * (np.cos(np.pi*nu/2)*x + x**2)
+    losNumer = E * np.sin(np.pi*nu/2)*x
     # E must be insMod
-    denom = 1 + (tau*af*(2j/2))**nu
-    comMod = numer/denom
-    strMod = comMod.real
-    losMod = comMod.imag
+    denom = 1 + 2*np.cos(np.pi*nu/2)*x + x**2
+    strMod = strNumer/denom
+    losMod = losNumer/denom
     return strMod, losMod
 
 def complexMod(E, tau, angFreq, nu):
@@ -150,7 +153,7 @@ if __name__=='__main__':
         c2 = 'b'
         a = 1
         legend_loc='upper left'
-        savefile = './png/fractional_Maxwell_complex_modulus_linear_nu{:.2f}.png'.format(nu)
+        savefile = './png/fractional_Maxwell_complex_modulus_linear_nu{:.2f}_2.png'.format(nu)
 
     if select == 1:
         y1 = log_strMod
@@ -163,7 +166,7 @@ if __name__=='__main__':
         c2 = 'b'
         a = 1
         legend_loc='upper left'
-        savefile = './png/fractional_Maxwell_complex_modulus_log_nu{:.2f}.png'.format(nu)
+        savefile = './png/fractional_Maxwell_complex_modulus_log_nu{:.2f}_2.png'.format(nu)
 
         try:
             fitting = int(input('Selection (curve fit: 0, no curve fit: 1): '))
@@ -186,7 +189,7 @@ if __name__=='__main__':
         c2 = 'b'
         a = 0
         legend_loc='upper right'
-        savefile = './png/fractional_Maxwell_loss_tangent_nu{:.2f}.png'.format(nu)
+        savefile = './png/fractional_Maxwell_loss_tangent_nu{:.2f}_2.png'.format(nu)
 
     # drawing graphs
     fig = plt.figure(figsize=(8,5), tight_layout=True)
