@@ -1,4 +1,4 @@
-# complex modulus of fractional Maxwell model
+# dynamic modulus of fractional Maxwell model
  
 import numpy as np
 from scipy.optimize import curve_fit

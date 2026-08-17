@@ -1,4 +1,4 @@
-# complex modulus of fractional Zener model
+# dynamic modulus of fractional Zener model
  
 import numpy as np
 from scipy.optimize import curve_fit
