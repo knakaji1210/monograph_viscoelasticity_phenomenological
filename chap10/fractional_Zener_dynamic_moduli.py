@@ -35,17 +35,21 @@ def freqAxes(tau):
     freqAxes = [angFreq, scaledAngFreq]
     return freqAxes
 
-def calc_complexMod(E, k, tau, af, nu):
-    numer = E*(1/k + (tau*af*(2j/2))**nu)
+# fractional_Zener_complex_modulus.pyとの比較して、
+# この部分だけが異なる。E'とE"について、顕な式を用いて計算するように変更した。
+# fractional_Zener_complex_modulus.pyの結果と同じになることを確認済み。
+def calc_dynamicMod(E, k, tau, af, nu):
+    x = (tau*af)**nu
+    strNumer = E * (1/k + (1 + 1/k) * np.cos(np.pi*nu/2)*x + x**2)
+    losNumer = E * (1 - 1/k) * np.sin(np.pi*nu/2)*x
     # E must be insMod
-    denom = 1 + (tau*af*(2j/2))**nu
-    comMod = numer/denom
-    strMod = comMod.real
-    losMod = comMod.imag
+    denom = 1 + 2*np.cos(np.pi*nu/2)*x + x**2
+    strMod = strNumer/denom
+    losMod = losNumer/denom
     return strMod, losMod
 
-def complexMod(E, k, tau, angFreq, nu):
-    strMod, losMod = calc_complexMod(E, k, tau, angFreq, nu)
+def dynamicMod(E, k, tau, angFreq, nu):
+    strMod, losMod = calc_dynamicMod(E, k, tau, angFreq, nu)
     dynamicMod = [strMod, losMod]
     return dynamicMod
 
@@ -140,8 +144,8 @@ if __name__=='__main__':
     angFreq = freqAxes[0]
     scaledAngFreq = freqAxes[1]
     scaledAngFreq_label = r'log($\omega\tau^\prime$)'
-    strMod = complexMod(insMod, k, tau_prime, angFreq, nu)[0]
-    losMod = complexMod(insMod, k, tau_prime, angFreq, nu)[1]
+    strMod = dynamicMod(insMod, k, tau_prime, angFreq, nu)[0]
+    losMod = dynamicMod(insMod, k, tau_prime, angFreq, nu)[1]
     losTan = np.divide(losMod, strMod, where=strMod!=0, out=np.full_like(strMod, np.nan))
     log_scaledAngFreq = np.log10(scaledAngFreq)
     log_strMod = np.log10(strMod, where=strMod>0, out=np.full_like(strMod, np.nan))
@@ -158,7 +162,7 @@ if __name__=='__main__':
         c2 = 'b'
         a = 1
         legend_loc='upper left'
-        savefile = './png/fractional_Zener_complex_modulus_linear_nu{:.2f}.png'.format(nu)
+        savefile = './png/fractional_Zener_dynamic_modulus_linear_nu{:.2f}.png'.format(nu)
 
     if select == 1:
         y1 = log_strMod
@@ -171,7 +175,7 @@ if __name__=='__main__':
         c2 = 'b'
         a = 1
         legend_loc='upper left'
-        savefile = './png/fractional_Zener_complex_modulus_log_nu{:.2f}.png'.format(nu)
+        savefile = './png/fractional_Zener_dynamic_modulus_log_nu{:.2f}.png'.format(nu)
 
         try:
             fitting = int(input('Selection (curve fit: 0, no curve fit: 1): '))
