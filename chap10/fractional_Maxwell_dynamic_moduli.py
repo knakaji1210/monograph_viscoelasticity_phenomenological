@@ -26,16 +26,16 @@ def reqParams():
     retardTime = kappa**(1/nu)*viscosity/modulus
     return insMod, modulus, retardTime, nu
 
-def freqAxes(retardTime):
-    centerAngFreq = 1 / retardTime
+def freqAxes(relaxTime):
+    centerAngFreq = 1 / relaxTime
     angFreq = np.logspace(int(np.log10(centerAngFreq))-5, int(np.log10(centerAngFreq))+5, 51)
-    scaledAngFreq = angFreq*retardTime
+    scaledAngFreq = angFreq*relaxTime
     freqAxes = [angFreq, scaledAngFreq]
     return freqAxes
 
 # このバージョンではこの部分だけ異なる。E'とE''の計算式をそのまま利用している。
 # fractional_Maxwell_complex_modulus.pyの結果と同じになることを確認済み。
-def calc_complexMod(E, tau, af, nu):
+def calc_dynamicMod(E, tau, af, nu):
     x = (tau*af)**nu
     strNumer = E * (np.cos(np.pi*nu/2)*x + x**2)
     losNumer = E * np.sin(np.pi*nu/2)*x
@@ -45,8 +45,8 @@ def calc_complexMod(E, tau, af, nu):
     losMod = losNumer/denom
     return strMod, losMod
 
-def complexMod(E, tau, angFreq, nu):
-    strMod, losMod = calc_complexMod(E, tau, angFreq, nu)
+def dynamicMod(E, tau, angFreq, nu):
+    strMod, losMod = calc_dynamicMod(E, tau, angFreq, nu)
     dynamicMod = [strMod, losMod]
     return dynamicMod
 
@@ -135,8 +135,8 @@ if __name__=='__main__':
     angFreq = freqAxes[0]
     scaledAngFreq = freqAxes[1]
     scaledAngFreq_label = r'log($\omega\tau$)'
-    strMod = complexMod(modulus, relaxTime, angFreq, nu)[0]
-    losMod = complexMod(modulus, relaxTime, angFreq, nu)[1]
+    strMod = dynamicMod(modulus, relaxTime, angFreq, nu)[0]
+    losMod = dynamicMod(modulus, relaxTime, angFreq, nu)[1]
     losTan = np.divide(losMod, strMod, where=strMod!=0, out=np.full_like(strMod, np.nan))
     log_scaledAngFreq = np.log10(scaledAngFreq)
     log_strMod = np.log10(strMod, where=strMod>0, out=np.full_like(strMod, np.nan))
@@ -153,7 +153,7 @@ if __name__=='__main__':
         c2 = 'b'
         a = 1
         legend_loc='upper left'
-        savefile = './png/fractional_Maxwell_complex_modulus_linear_nu{:.2f}_2.png'.format(nu)
+        savefile = './png/fractional_Maxwell_dynamic_modulus_linear_nu{:.2f}.png'.format(nu)
 
     if select == 1:
         y1 = log_strMod
@@ -166,7 +166,7 @@ if __name__=='__main__':
         c2 = 'b'
         a = 1
         legend_loc='upper left'
-        savefile = './png/fractional_Maxwell_complex_modulus_log_nu{:.2f}_2.png'.format(nu)
+        savefile = './png/fractional_Maxwell_dynamic_modulus_log_nu{:.2f}.png'.format(nu)
 
         try:
             fitting = int(input('Selection (curve fit: 0, no curve fit: 1): '))

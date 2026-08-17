@@ -26,10 +26,10 @@ def reqParams():
     retardTime = kappa**(1/nu)*viscosity/modulus
     return insMod, modulus, retardTime, nu
 
-def freqAxes(retardTime):
-    centerAngFreq = 1 / retardTime
+def freqAxes(relaxTime):
+    centerAngFreq = 1 / relaxTime
     angFreq = np.logspace(int(np.log10(centerAngFreq))-5, int(np.log10(centerAngFreq))+5, 51)
-    scaledAngFreq = angFreq*retardTime
+    scaledAngFreq = angFreq*relaxTime
     freqAxes = [angFreq, scaledAngFreq]
     return freqAxes
 
