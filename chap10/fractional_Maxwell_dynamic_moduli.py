@@ -33,7 +33,8 @@ def freqAxes(relaxTime):
     freqAxes = [angFreq, scaledAngFreq]
     return freqAxes
 
-# このバージョンではこの部分だけ異なる。E'とE''の計算式をそのまま利用している。
+# fractional_Maxwell_complex_modulus.pyとの比較して、
+# この部分だけが異なる。E'とE"について、顕な式を用いて計算するように変更した。
 # fractional_Maxwell_complex_modulus.pyの結果と同じになることを確認済み。
 def calc_dynamicMod(E, tau, af, nu):
     x = (tau*af)**nu
