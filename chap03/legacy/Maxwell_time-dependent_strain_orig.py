@@ -13,9 +13,9 @@ def reqParams():
     except ValueError:
         viscosity = 10**4
     relaxTime = viscosity/modulus
-    return modulus, viscosity,relaxTime
+    return modulus, relaxTime
 
-def func_Maxwell1(viscosity, relaxTime):
+def func_Maxwell1(modulus, relaxTime):
     try:
         c = float(input('Enter c of strain = c*time (default = 10): '))
     except ValueError:
@@ -25,42 +25,48 @@ def func_Maxwell1(viscosity, relaxTime):
     except ValueError:
         t1 = 50*10**(-3)
     tim = np.linspace(0, t1, 500)
-    strain = c*tim
-    stress = c*viscosity*(1 - np.exp(-tim/relaxTime))
+    strain = np.array([c*t for t in tim])
+    stress = np.array([c*modulus*relaxTime*(1 - np.exp(-t/relaxTime)) for t in tim])
+    stress = np.array(stress)
+    stress /= 10**6             # rescale to MPa
     return c, t1, tim, strain, stress
 
-def func_Maxwell2(viscosity, relaxTime, c, t1, s1):
+def func_Maxwell2(modulus, relaxTime, c, t1):
     try:
         dt = float(input('Enter dt = t2 - t1 (t1<=t<t2) (default = 10 ms): '))*10**(-3)
     except ValueError:
         dt = 10*10**(-3)
     t2 = t1 + dt
     tim = np.linspace(t1, t2, 500)
-    strain = c*t1*np.ones(len(tim))
-    stress = s1*np.exp(-(tim - t1)/relaxTime)
+    strain = np.array([c*t1 for t in tim])
+    stress = np.array([c*modulus*relaxTime*(np.exp(t1/relaxTime) - 1)*np.exp(-t/relaxTime) for t in tim])
+    stress = np.array(stress)
+    stress /= 10**6             # rescale to MPa
     return t2, tim, strain, stress
 
-def func_Maxwell3(viscosity, relaxTime, c, t2, s2):
+def func_Maxwell3(modulus, relaxTime, c, t1, t2):
     try:
         dt = float(input('Enter dt = t3 - t2 (t2<=t<t3) (default = 30 ms): '))*10**(-3)  
     except ValueError:
         dt = 30*10**(-3)
     t3 = t2 + dt
     tim = np.linspace(t2, t3, 500)
-    strain = c*(t1 + t2 -tim)
-    stress = -c*viscosity + (s2 + c*viscosity)*np.exp(-(tim - t2)/relaxTime)
+    strain = np.array([c*(t1 + t2 -t) for t in tim])
+    stress = np.array([c*modulus*relaxTime*((np.exp(t1/relaxTime) + np.exp(t2/relaxTime) - 1)*np.exp(-t/relaxTime) - 1) for t in tim])
+    stress = np.array(stress)
+    stress /= 10**6             # rescale to MPa
     return t3, tim, strain, stress
 
 if __name__=='__main__':
-    E, Eta,T = reqParams()
-    c, t1, tim1, strain1, stress1 = func_Maxwell1(Eta,T)
-    s1 = stress1[-1]    # stress at t1
-    t2, tim2, strain2, stress2 = func_Maxwell2(Eta, T, c, t1, s1)
-    s2 = stress2[-1]    # stress at t2
-    t3, tim3, strain3, stress3 = func_Maxwell3(Eta, T, c, t2, s2)
-    tim = np.concatenate([tim1,tim2,tim3])/10**(-3)   # rescale to ms
+    E, T = reqParams()
+    c, t1, tim1, strain1, stress1 = func_Maxwell1(E, T)
+    t2, tim2, strain2, stress2 = func_Maxwell2(E, T, c, t1)
+    t3, tim3, strain3, stress3 = func_Maxwell3(E, T, c, t1, t2)
     strain = np.concatenate([strain1,strain2,strain3])
-    stress = np.concatenate([stress1,stress2,stress3])/10**6   # rescale to MPa
+    stress = np.concatenate([stress1,stress2,stress3])
+    tim1 *=10**3    # rescale to ms
+    tim2 *=10**3    # rescale to ms
+    tim3 *=10**3    # rescale to ms
     min_stress = np.min(stress)
     max_stress = np.max(stress)
 
@@ -75,7 +81,9 @@ if __name__=='__main__':
     ax1.set_ylim(np.max(strain)*(-0.2), np.max(strain)*1.2)
     ax1.grid()
     ax1.set_axisbelow(True)
-    ax1.plot(tim, strain, c='b', lw=2, label='Time-dependent strain')
+    ax1.plot(tim1, strain1, c='b', lw=2, label='Time-dependent strain')
+    ax1.plot(tim2, strain2, c='b', lw=2)
+    ax1.plot(tim3, strain3, c='b', lw=2)
     ax1.legend(loc='upper right')
 
     ax2 = fig.add_subplot(212)
@@ -85,7 +93,9 @@ if __name__=='__main__':
     ax2.set_ylim(abs(min_stress)*(-1.2), abs(max_stress)*1.2)
     ax2.grid()
     ax2.set_axisbelow(True)
-    ax2.plot(tim, stress, c='r', lw=2, label='Response to time-dependent strain')
+    ax2.plot(tim1, stress1, c='r', lw=2, label='Response to time-dependent strain')
+    ax2.plot(tim2, stress2, c='r', lw=2)
+    ax2.plot(tim3, stress3, c='r', lw=2)
     ax2.legend(loc='upper right')
 
     savefile = './png/Maxwell_time-dependent_strain_(tau={0:.1f}ms).png'.format(T*10**3)
