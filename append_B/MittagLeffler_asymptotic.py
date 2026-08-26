@@ -24,7 +24,7 @@ if __name__=='__main__':
     except ValueError:
         nu = 0.5  # Default value if input is invalid
 
-    func_list = [r'exp($-{\alpha t}$)', r'$E_{\nu, 1}(-\alpha t^{\nu})$', r'exp($-{\alpha t^{\nu}}$)', r'$-\alpha t^{\nu}$']  # 関数のリスト
+    func_list = [r'exp($-{\alpha t}$)', r'$E_{\nu, 1}(-\alpha t^{\nu})$', r'exp($-{\alpha t^{\nu}}$)', r'$1/(\alpha\Gamma(1-\nu)) t^{-\nu}$']  # 関数のリスト
 
     if select == 0:  # 線形スケールの場合
         ts = 0      # 下限
