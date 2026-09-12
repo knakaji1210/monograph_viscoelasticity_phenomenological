@@ -59,7 +59,7 @@ if __name__=='__main__':
     ax.set_ylabel(ylabel)
     for i in range(len(nu_arr)):
         ax.plot(log_Tim, y_array[i], label=f'$\\nu$ = {nu_arr[i]:.1f}', color=cmap(i/len(nu_arr)), linewidth=2, zorder=2)
-        ax.vlines([np.log10(tau_prime_arr[i])], 0, 1.1, label=f'$\\tau^\\prime$ = {tau_prime_arr[i]*10**6:.1f} $\\mu$s', color=cmap(i/len(nu_arr)), ls='--', linewidth=1, zorder=1)
+        ax.vlines([np.log10(tau_prime_arr[i])], 0, 1.1, label=f'$\\tau^\\prime$ = {tau_prime_arr[i]*10**6:.1f} $\\mu$s', color=cmap(i/len(nu_arr + 1.0)), ls='--', linewidth=1, zorder=1)
     ax.vlines([np.log10(tau)], 0, 1.1, label=f'$\\tau$ = {tau*10**3:.1f} ms', color='red', ls='--', linewidth=1, zorder=1)
     ax.grid(True, linestyle=":", alpha=0.6)
     ax.legend(loc='upper left', fontsize=11)
